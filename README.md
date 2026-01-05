@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# Space Assault
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A 3D space shooter game built with React Three Fiber. Galaga-style gameplay with a modern tech stack.
 
-Currently, two official plugins are available:
+## Play
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open <http://localhost:5173> in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Controls
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Key              | Action                 |
+| ---------------- | ---------------------- |
+| W / Arrow Up     | Move up                |
+| S / Arrow Down   | Move down              |
+| A / Arrow Left   | Move left              |
+| D / Arrow Right  | Move right             |
+| Space            | Fire                   |
+| Enter            | Start / Pause / Resume |
+
+## Features
+
+- Third-person behind-the-ship perspective
+- Streaming star field for motion illusion
+- Enemies that approach slowly then dive fast
+- AABB collision detection
+- Pause/resume functionality
+- Score tracking and lives system
+
+## Tech Stack
+
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **React Three Fiber** - React renderer for Three.js
+- **Drei** - R3F utilities
+- **Zustand** - State management
+
+## Scripts
+
+```bash
+npm run dev      # Start dev server (localhost:5173)
+npm run build    # Type-check and build for production
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
 ```
+
+## Project Structure
+
+```text
+src/
+├── App.tsx           # Game + UI orchestration
+├── game/             # R3F Canvas, Scene, GameLoop
+├── entities/         # Player, Enemy, Bullet, Stars
+├── stores/           # Zustand state (game, player, enemy, bullet)
+├── systems/          # Collision detection
+├── hooks/            # Keyboard input
+├── types/            # TypeScript definitions
+├── constants/        # Game configuration
+└── ui/               # HUD, menus, pause screen
+```
+
+## Configuration
+
+Game parameters can be tuned in `src/constants/gameConfig.ts`:
+
+- Player speed and movement bounds
+- Bullet speed and fire rate
+- Enemy spawn rate, speeds, and spawn ranges
+- Colors and sizes

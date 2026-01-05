@@ -1,35 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/**
+ * App - Main application component
+ *
+ * Orchestrates the game canvas and UI overlays.
+ * UI is rendered as HTML on top of the 3D canvas.
+ *
+ * PATTERN: Layered rendering
+ * - Canvas (3D) is the base layer, always visible
+ * - HTML overlays render on top based on game phase
+ * - This allows smooth transitions without remounting canvas
+ */
+
+import { useEffect } from 'react';
+import { Game } from './game/Game';
+import { HUD } from './ui/HUD';
+import { StartScreen } from './ui/StartScreen';
+import { GameOverScreen } from './ui/GameOverScreen';
+import { PauseScreen } from './ui/PauseScreen';
+import { useGameStore } from './stores/gameStore';
+import './index.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Subscribe to game phase for conditional UI rendering
+  const phase = useGameStore((state) => state.phase);
+  const pauseGame = useGameStore((state) => state.pauseGame);
+
+  // Listen for Enter key to pause during gameplay
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Enter' && phase === 'playing') {
+        event.preventDefault();
+        pauseGame();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, pauseGame]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app">
+      {/* 3D Game Canvas - always rendered */}
+      <Game />
+
+      {/* HTML UI Overlays - conditionally rendered based on phase */}
+      {phase === 'menu' && <StartScreen />}
+      {(phase === 'playing' || phase === 'paused') && <HUD />}
+      {phase === 'paused' && <PauseScreen />}
+      {phase === 'gameOver' && <GameOverScreen />}
+    </div>
+  );
 }
 
-export default App
+export default App;

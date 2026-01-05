@@ -1,0 +1,102 @@
+/**
+ * Enemy Store - Manages all enemy entities
+ *
+ * PATTERN: Entity array with CRUD operations
+ * - Enemies are stored as an array
+ * - Each enemy has a unique ID for targeting
+ * - Manager component reads array and renders Enemy components
+ * - Individual Enemy components update their own position via updateEnemy
+ *
+ * NOTE: Position updates happen frequently (every frame), so we use
+ * getState() in useFrame rather than subscribing to avoid re-renders.
+ */
+
+import { create } from 'zustand';
+import type { Enemy, Vector3, EnemyPhase } from '../types/game.types';
+import { GAME_CONFIG } from '../constants/gameConfig';
+
+interface EnemyState {
+  enemies: Enemy[];
+
+  // Actions
+  addEnemy: (enemy: Enemy) => void;
+  removeEnemy: (id: string) => void;
+  updateEnemy: (id: string, updates: Partial<Enemy>) => void;
+  updateEnemyPosition: (id: string, position: Vector3) => void;
+  clearEnemies: () => void;
+}
+
+export const useEnemyStore = create<EnemyState>((set) => ({
+  enemies: [],
+
+  // Add a new enemy to the game
+  addEnemy: (enemy) => {
+    set((state) => ({
+      enemies: [...state.enemies, enemy],
+    }));
+  },
+
+  // Remove enemy by ID (when destroyed or exits screen)
+  removeEnemy: (id) => {
+    set((state) => ({
+      enemies: state.enemies.filter((e) => e.id !== id),
+    }));
+  },
+
+  // Update any enemy properties (phase, health, etc.)
+  updateEnemy: (id, updates) => {
+    set((state) => ({
+      enemies: state.enemies.map((e) =>
+        e.id === id ? { ...e, ...updates } : e
+      ),
+    }));
+  },
+
+  // Optimized position-only update (called every frame)
+  updateEnemyPosition: (id, position) => {
+    set((state) => ({
+      enemies: state.enemies.map((e) =>
+        e.id === id ? { ...e, position } : e
+      ),
+    }));
+  },
+
+  // Clear all enemies (on game reset)
+  clearEnemies: () => {
+    set({ enemies: [] });
+  },
+}));
+
+/**
+ * Helper function to create a new enemy entity
+ * Called by EnemyManager when spawning
+ */
+export function createEnemy(id: string): Enemy {
+  const { ENEMY_SPAWN_Z, ENEMY_SPAWN_X_RANGE, ENEMY_SPAWN_Y_RANGE, ENEMY_APPROACH_SPEED } = GAME_CONFIG;
+
+  // Random X position within spawn range
+  const spawnX =
+    Math.random() * (ENEMY_SPAWN_X_RANGE.max - ENEMY_SPAWN_X_RANGE.min) +
+    ENEMY_SPAWN_X_RANGE.min;
+
+  // Random Y position within spawn range (vertical variety)
+  const spawnY =
+    Math.random() * (ENEMY_SPAWN_Y_RANGE.max - ENEMY_SPAWN_Y_RANGE.min) +
+    ENEMY_SPAWN_Y_RANGE.min;
+
+  return {
+    id,
+    position: {
+      x: spawnX,
+      y: spawnY,
+      z: ENEMY_SPAWN_Z,
+    },
+    velocity: {
+      x: 0,
+      y: 0,
+      z: ENEMY_APPROACH_SPEED, // Moving toward player (positive Z)
+    },
+    health: 1,
+    phase: 'approaching' as EnemyPhase,
+  };
+}
