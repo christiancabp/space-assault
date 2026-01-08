@@ -64,6 +64,22 @@ src/
 └── ui/               # HUD, menus, pause screen
 ```
 
+## 3D Models
+
+Ship models in `src/assets/` (CC-BY-4.0 licensed):
+
+| Folder | Component | Model |
+|--------|-----------|-------|
+| planet-express | `PlanetExpress.tsx` | Planet Express SpaceShip |
+| rick-n-morty | `RickNMorty.tsx` | Rick's ship from Rick and Morty |
+| rocketship | `Rocketship.tsx` | Spaceship |
+| sanitation-ship | `SanitationShip.tsx` | Space Garbage Truck |
+| sayan-capsule | `SayanCapsule.tsx` | Vegeta SpaceShip |
+| space-shuttle | `SpaceShuttle.tsx` | Space Shuttle |
+| starship | `Starship.tsx` | SpaceX Starship |
+| tie-fighter | `TieFighter.tsx` | T.I.E Fighter |
+| time-machine | `TimeMachine.tsx` | Dragon Ball Time Machine |
+
 ## Configuration
 
 Game parameters can be tuned in `src/constants/gameConfig.ts`:

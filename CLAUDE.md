@@ -34,6 +34,7 @@ npm run preview  # Preview production build locally
 ``` bash
 src/
 ├── App.tsx                 # Game + UI overlay orchestration
+├── assets/                 # 3D models (GLB + generated JSX components)
 ├── game/                   # R3F Canvas, Scene, GameLoop
 ├── entities/               # Player, Enemy, Bullet, Stars components
 ├── stores/                 # Zustand stores (game, player, enemy, bullet)
@@ -43,6 +44,22 @@ src/
 ├── constants/              # Game configuration values
 └── ui/                     # HTML overlay components (HUD, menus)
 ```
+
+### 3D Models
+
+Ship models in `src/assets/` (CC-BY-4.0 licensed, generated via `gltfjsx`):
+
+| Folder | Component | Model |
+|--------|-----------|-------|
+| planet-express | `PlanetExpress.tsx` | Planet Express SpaceShip |
+| rick-n-morty | `RickNMorty.tsx` | Rick's ship from Rick and Morty |
+| rocketship | `Rocketship.tsx` | Spaceship |
+| sanitation-ship | `SanitationShip.tsx` | Space Garbage Truck |
+| sayan-capsule | `SayanCapsule.tsx` | Vegeta SpaceShip |
+| space-shuttle | `SpaceShuttle.tsx` | Space Shuttle |
+| starship | `Starship.tsx` | SpaceX Starship |
+| tie-fighter | `TieFighter.tsx` | T.I.E Fighter |
+| time-machine | `TimeMachine.tsx` | Dragon Ball Time Machine |
 
 ### Key Patterns
 
