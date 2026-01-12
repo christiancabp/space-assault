@@ -21,6 +21,14 @@ export const GAME_CONFIG = {
     maxY: 8,                           // Don't go too high
   },
 
+  // Ship tilt animation (roll/pitch when moving)
+  PLAYER_TILT: {
+    maxRoll: 0.5,                      // ~23 degrees max roll (Z-axis)
+    maxPitch: 0.3,                    // ~14 degrees max pitch (X-axis)
+    easeInSpeed: 12,                   // Fast snap into the roll
+    easeOutSpeed: 3,                   // Slow ease back to neutral
+  },
+
   // ============================================
   // BULLET SETTINGS
   // ============================================

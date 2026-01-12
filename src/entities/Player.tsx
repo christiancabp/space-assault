@@ -33,6 +33,10 @@ export function Player() {
   // Track last shot time for fire rate limiting
   const lastShotTime = useRef(0);
 
+  // Track current roll/pitch for smooth animation
+  const currentRoll = useRef(0);
+  const currentPitch = useRef(0);
+
   // Store actions
   const setPosition = usePlayerStore((state) => state.setPosition);
   const addBullet = useBulletStore((state) => state.addBullet);
@@ -45,28 +49,32 @@ export function Player() {
     // Don't update when paused or not playing
     if (phase !== 'playing') return;
 
-    const { PLAYER_SPEED, PLAYER_BOUNDS } = GAME_CONFIG;
+    const { PLAYER_SPEED, PLAYER_BOUNDS, PLAYER_TILT } = GAME_CONFIG;
     const keys = keysPressed.current;
 
-    // Calculate movement based on input
-    let moveX = 0;
-    let moveY = 0;
+    // Calculate input direction (-1, 0, or 1 for each axis)
+    let inputX = 0;
+    let inputY = 0;
 
-    // Horizontal movement (A/D or Left/Right arrows)
+    // Horizontal input (A/D or Left/Right arrows)
     if (keys.has('KeyA') || keys.has('ArrowLeft')) {
-      moveX -= PLAYER_SPEED * delta;
+      inputX -= 1;
     }
     if (keys.has('KeyD') || keys.has('ArrowRight')) {
-      moveX += PLAYER_SPEED * delta;
+      inputX += 1;
     }
 
-    // Vertical movement (W/S or Up/Down arrows)
+    // Vertical input (W/S or Up/Down arrows)
     if (keys.has('KeyW') || keys.has('ArrowUp')) {
-      moveY += PLAYER_SPEED * delta;
+      inputY += 1;
     }
     if (keys.has('KeyS') || keys.has('ArrowDown')) {
-      moveY -= PLAYER_SPEED * delta;
+      inputY -= 1;
     }
+
+    // Calculate movement from input
+    const moveX = inputX * PLAYER_SPEED * delta;
+    const moveY = inputY * PLAYER_SPEED * delta;
 
     // Apply movement with bounds clamping
     const newX = THREE.MathUtils.clamp(
@@ -83,6 +91,24 @@ export function Player() {
     // Update group position directly (no re-render)
     groupRef.current.position.x = newX;
     groupRef.current.position.y = newY;
+
+    // Calculate target roll/pitch based on input direction
+    const targetRoll = -inputX * PLAYER_TILT.maxRoll;  // Roll right when moving right
+    const targetPitch = inputY * PLAYER_TILT.maxPitch; // Pitch up when moving up
+
+    // Asymmetric easing: fast into roll, slow back to neutral
+    const rollSpeed = targetRoll !== 0 ? PLAYER_TILT.easeInSpeed : PLAYER_TILT.easeOutSpeed;
+    const pitchSpeed = targetPitch !== 0 ? PLAYER_TILT.easeInSpeed : PLAYER_TILT.easeOutSpeed;
+
+    const rollEase = 1 - Math.exp(-rollSpeed * delta);
+    const pitchEase = 1 - Math.exp(-pitchSpeed * delta);
+
+    currentRoll.current = THREE.MathUtils.lerp(currentRoll.current, targetRoll, rollEase);
+    currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch, pitchEase);
+
+    // Apply rotation to ship
+    groupRef.current.rotation.z = currentRoll.current;
+    groupRef.current.rotation.x = currentPitch.current;
 
     // Sync position to store for collision detection
     setPosition({ x: newX, y: newY });
