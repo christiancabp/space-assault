@@ -29,6 +29,13 @@ export const GAME_CONFIG = {
     easeOutSpeed: 3,                   // Slow ease back to neutral
   },
 
+  // Double-tap barrel roll
+  BARREL_ROLL: {
+    doubleTapThreshold: 300,           // ms window to detect double-tap
+    duration: 450,                     // ms for full 360° roll
+    shiftDistance: 4,                  // units to shift left/right during roll
+  },
+
   // ============================================
   // BULLET SETTINGS
   // ============================================
@@ -72,7 +79,7 @@ export const GAME_CONFIG = {
   // CAMERA
   // ============================================
   CAMERA: {
-    position: { x: 0, y: 10, z: 8 },  // Behind and above player
+    position: { x: 0, y: 10, z: 10 },  // Behind and above player
     fov: 70,                           // Field of view
     lookAt: { x: 0, y: 0, z: -15 },    // Look forward into play area
   },

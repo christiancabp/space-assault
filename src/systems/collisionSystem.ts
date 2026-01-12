@@ -49,7 +49,7 @@ export function checkCollisions(): void {
   const bullets = useBulletStore.getState().bullets;
   const playerState = usePlayerStore.getState();
   const playerPos = playerState.position;
-  const isInvulnerable = playerState.isInvulnerable;
+  const isInvulnerable = playerState.isInvulnerable || playerState.isBarrelRolling;
   const shipConfig = getShipConfig(playerState.selectedShipId);
 
   // Get store actions

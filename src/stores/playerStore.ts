@@ -23,12 +23,16 @@ interface PlayerState {
   // Brief invulnerability after getting hit
   isInvulnerable: boolean;
 
+  // Barrel roll state (also grants invincibility)
+  isBarrelRolling: boolean;
+
   // Selected ship for player
   selectedShipId: ShipId;
 
   // Actions
   setPosition: (pos: Partial<Vector3>) => void;
   setInvulnerable: (value: boolean) => void;
+  setBarrelRolling: (value: boolean) => void;
   setShipId: (id: ShipId) => void;
   resetPlayer: () => void;
 }
@@ -43,6 +47,7 @@ const INITIAL_POSITION: Vector3 = {
 export const usePlayerStore = create<PlayerState>((set) => ({
   position: { ...INITIAL_POSITION },
   isInvulnerable: false,
+  isBarrelRolling: false,
   selectedShipId: DEFAULT_SHIP_ID,
 
   // Update position (partial updates allowed)
@@ -57,6 +62,11 @@ export const usePlayerStore = create<PlayerState>((set) => ({
     set({ isInvulnerable: value });
   },
 
+  // Toggle barrel rolling state (grants invincibility)
+  setBarrelRolling: (value) => {
+    set({ isBarrelRolling: value });
+  },
+
   // Select a ship
   setShipId: (id) => {
     set({ selectedShipId: id });
@@ -67,6 +77,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
     set({
       position: { ...INITIAL_POSITION },
       isInvulnerable: false,
+      isBarrelRolling: false,
     });
   },
 }));
