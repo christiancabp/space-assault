@@ -20,7 +20,7 @@ import { EnemyManager } from '../entities/EnemyManager';
 import { BulletManager } from '../entities/BulletManager';
 import { Stars } from '../entities/Stars';
 import { useGameStore } from '../stores/gameStore';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 export function Game() {
   // Subscribe to game phase for conditional rendering

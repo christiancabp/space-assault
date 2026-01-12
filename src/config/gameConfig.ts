@@ -15,8 +15,8 @@ export const GAME_CONFIG = {
 
   // Player movement boundaries (X and Y)
   PLAYER_BOUNDS: {
-    minX: -12,
-    maxX: 12,
+    minX: -10,
+    maxX: 10,
     minY: 0.5,                         // Don't go below "ground"
     maxY: 8,                           // Don't go too high
   },
@@ -64,7 +64,7 @@ export const GAME_CONFIG = {
   // CAMERA
   // ============================================
   CAMERA: {
-    position: { x: 0, y: 10, z: 15 },  // Behind and above player
+    position: { x: 0, y: 10, z: 8 },  // Behind and above player
     fov: 70,                           // Field of view
     lookAt: { x: 0, y: 0, z: -15 },    // Look forward into play area
   },

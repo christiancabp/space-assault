@@ -14,7 +14,8 @@ import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useGameStore } from '../stores/gameStore';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
+import { getShipConfig } from '../config';
 
 // Hitbox definition for collision checks
 interface Hitbox {
@@ -46,8 +47,10 @@ export function checkCollisions(): void {
   // Get current state from all stores (no subscription, just snapshot)
   const enemies = useEnemyStore.getState().enemies;
   const bullets = useBulletStore.getState().bullets;
-  const playerPos = usePlayerStore.getState().position;
-  const isInvulnerable = usePlayerStore.getState().isInvulnerable;
+  const playerState = usePlayerStore.getState();
+  const playerPos = playerState.position;
+  const isInvulnerable = playerState.isInvulnerable;
+  const shipConfig = getShipConfig(playerState.selectedShipId);
 
   // Get store actions
   const removeEnemy = useEnemyStore.getState().removeEnemy;
@@ -59,14 +62,14 @@ export function checkCollisions(): void {
   // Define hitbox sizes
   const { BULLET_SIZE, ENEMY_SIZE } = GAME_CONFIG;
 
-  // Player hitbox (slightly smaller than visual for fairness)
+  // Player hitbox from ship config
   const playerHitbox: Hitbox = {
     x: playerPos.x,
     y: playerPos.y,
     z: playerPos.z,
-    width: 0.8,
-    height: 0.4,
-    depth: 1.2,
+    width: shipConfig.hitbox.width,
+    height: shipConfig.hitbox.height,
+    depth: shipConfig.hitbox.depth,
   };
 
   // Track entities to remove (avoid modifying arrays while iterating)

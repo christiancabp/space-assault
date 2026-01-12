@@ -34,32 +34,43 @@ npm run preview  # Preview production build locally
 ``` bash
 src/
 ├── App.tsx                 # Game + UI overlay orchestration
-├── assets/                 # 3D models (GLB + generated JSX components)
-├── game/                   # R3F Canvas, Scene, GameLoop
+├── config/                 # Game and ship configuration
+│   ├── gameConfig.ts       # Tunable game values (speeds, bounds, etc.)
+│   └── shipConfigs.ts      # Ship transforms, hitboxes, engine mounts
 ├── entities/               # Player, Enemy, Bullet, Stars components
+├── game/                   # R3F Canvas, Scene, GameLoop
+├── hooks/                  # Custom hooks (keyboard input)
+├── ships/                  # Ship components (gltfjsx-generated)
+│   ├── Rocketship.tsx      # Active ship component
+│   └── _wip/               # Ships needing TypeScript fixes
 ├── stores/                 # Zustand stores (game, player, enemy, bullet)
 ├── systems/                # Game systems (collision detection)
-├── hooks/                  # Custom hooks (keyboard input)
 ├── types/                  # TypeScript type definitions
-├── constants/              # Game configuration values
+│   ├── game.types.ts       # Game state types
+│   └── ship.types.ts       # Ship config types (ShipId, ShipConfig, etc.)
 └── ui/                     # HTML overlay components (HUD, menus)
+
+public/
+└── models/                 # GLB model files loaded at runtime
 ```
 
 ### 3D Models
 
-Ship models in `src/assets/` (CC-BY-4.0 licensed, generated via `gltfjsx`):
+GLB model files are in `public/models/` and loaded at runtime. Ship components in `src/ships/` are generated via `gltfjsx`.
 
-| Folder | Component | Model |
-|--------|-----------|-------|
-| planet-express | `PlanetExpress.tsx` | Planet Express SpaceShip |
-| rick-n-morty | `RickNMorty.tsx` | Rick's ship from Rick and Morty |
-| rocketship | `Rocketship.tsx` | Spaceship |
-| sanitation-ship | `SanitationShip.tsx` | Space Garbage Truck |
-| sayan-capsule | `SayanCapsule.tsx` | Vegeta SpaceShip |
-| space-shuttle | `SpaceShuttle.tsx` | Space Shuttle |
-| starship | `Starship.tsx` | SpaceX Starship |
-| tie-fighter | `TieFighter.tsx` | T.I.E Fighter |
-| time-machine | `TimeMachine.tsx` | Dragon Ball Time Machine |
+| Model File | Component | Status | Description |
+|------------|-----------|--------|-------------|
+| rocketship.glb | `Rocketship.tsx` | Active | Spaceship |
+| planet-express.glb | `PlanetExpress.tsx` | WIP | Planet Express SpaceShip |
+| rick-n-morty.glb | `RickNMorty.tsx` | WIP | Rick's ship from Rick and Morty |
+| sanitation-ship.glb | `SanitationShip.tsx` | WIP | Space Garbage Truck |
+| sayan-capsule.glb | `SayanCapsule.tsx` | WIP | Vegeta SpaceShip |
+| space-shuttle.glb | `SpaceShuttle.tsx` | WIP | Space Shuttle |
+| starship.glb | `Starship.tsx` | WIP | SpaceX Starship |
+| tie-fighter.glb | `TieFighter.tsx` | WIP | T.I.E Fighter |
+| time-machine.glb | `TimeMachine.tsx` | WIP | Dragon Ball Time Machine |
+
+WIP ships are in `src/ships/_wip/` and need TypeScript fixes before activation. All models are CC-BY-4.0 licensed.
 
 ### Key Patterns
 
@@ -82,12 +93,18 @@ Ship models in `src/assets/` (CC-BY-4.0 licensed, generated via `gltfjsx`):
 
 ## Configuration
 
-All tunable game values are in `src/constants/gameConfig.ts`:
+Configuration is split across `src/config/`:
 
+**`gameConfig.ts`** - Tunable game values:
 - Player speed and bounds
 - Bullet speed and fire rate
 - Enemy spawn rate and speeds
 - Colors, sizes, etc.
+
+**`shipConfigs.ts`** - Per-ship configuration:
+- Transform (scale, rotation, position offset)
+- Hitbox dimensions
+- Engine mounts (for future propulsion effects)
 
 ## Controls
 

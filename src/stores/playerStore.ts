@@ -12,7 +12,9 @@
 
 import { create } from 'zustand';
 import type { Vector3 } from '../types/game.types';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import type { ShipId } from '../types/ship.types';
+import { GAME_CONFIG } from '../config';
+import { DEFAULT_SHIP_ID } from '../config';
 
 interface PlayerState {
   // Position synced from Player component
@@ -21,9 +23,13 @@ interface PlayerState {
   // Brief invulnerability after getting hit
   isInvulnerable: boolean;
 
+  // Selected ship for player
+  selectedShipId: ShipId;
+
   // Actions
   setPosition: (pos: Partial<Vector3>) => void;
   setInvulnerable: (value: boolean) => void;
+  setShipId: (id: ShipId) => void;
   resetPlayer: () => void;
 }
 
@@ -37,6 +43,7 @@ const INITIAL_POSITION: Vector3 = {
 export const usePlayerStore = create<PlayerState>((set) => ({
   position: { ...INITIAL_POSITION },
   isInvulnerable: false,
+  selectedShipId: DEFAULT_SHIP_ID,
 
   // Update position (partial updates allowed)
   setPosition: (pos) => {
@@ -48,6 +55,11 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   // Toggle invulnerability (used after getting hit)
   setInvulnerable: (value) => {
     set({ isInvulnerable: value });
+  },
+
+  // Select a ship
+  setShipId: (id) => {
+    set({ selectedShipId: id });
   },
 
   // Reset player to starting position

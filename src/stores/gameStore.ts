@@ -12,7 +12,7 @@
 
 import { create } from 'zustand';
 import type { GamePhase } from '../types/game.types';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 interface GameState {
   // State

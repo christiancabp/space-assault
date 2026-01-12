@@ -23,7 +23,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Model(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/model.glb') as GLTFResult
+  const { nodes, materials } = useGLTF('/models/sayan-capsule.glb') as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group rotation={[-Math.PI / 2, 0, 0]} scale={0.212}>
@@ -33,4 +33,4 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/model.glb')
+useGLTF.preload('/models/sayan-capsule.glb')

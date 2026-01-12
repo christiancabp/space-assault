@@ -15,7 +15,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEnemyStore, createEnemy } from '../stores/enemyStore';
 import { useGameStore } from '../stores/gameStore';
 import { Enemy } from './Enemy';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 export function EnemyManager() {
   // Track time since last spawn

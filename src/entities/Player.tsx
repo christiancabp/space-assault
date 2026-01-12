@@ -2,13 +2,13 @@
  * Player - Player ship entity
  *
  * Handles:
- * - Rendering the player mesh (white cube)
+ * - Rendering the player ship (3D model)
  * - Movement via keyboard input (WASD/Arrows)
  * - Shooting via spacebar
  * - Syncing position to store for collision detection
  *
  * PATTERN: Entity with useFrame for updates
- * - useRef for direct mesh manipulation (no re-renders)
+ * - useRef for direct group manipulation (no re-renders)
  * - useFrame for per-frame updates with delta time
  * - Keyboard state read from useKeyboard hook
  */
@@ -20,11 +20,12 @@ import { useKeyboard } from '../hooks/useKeyboard';
 import { usePlayerStore } from '../stores/playerStore';
 import { useGameStore } from '../stores/gameStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
+import { Rocketship } from '../ships';
 
 export function Player() {
-  // Ref to the mesh for direct position updates
-  const meshRef = useRef<THREE.Mesh>(null);
+  // Ref to the group for direct position updates
+  const groupRef = useRef<THREE.Group>(null);
 
   // Keyboard state (Set of pressed key codes)
   const keysPressed = useKeyboard();
@@ -39,7 +40,7 @@ export function Player() {
 
   // Game loop - runs every frame
   useFrame((state, delta) => {
-    if (!meshRef.current) return;
+    if (!groupRef.current) return;
 
     // Don't update when paused or not playing
     if (phase !== 'playing') return;
@@ -69,19 +70,19 @@ export function Player() {
 
     // Apply movement with bounds clamping
     const newX = THREE.MathUtils.clamp(
-      meshRef.current.position.x + moveX,
+      groupRef.current.position.x + moveX,
       PLAYER_BOUNDS.minX,
       PLAYER_BOUNDS.maxX
     );
     const newY = THREE.MathUtils.clamp(
-      meshRef.current.position.y + moveY,
+      groupRef.current.position.y + moveY,
       PLAYER_BOUNDS.minY,
       PLAYER_BOUNDS.maxY
     );
 
-    // Update mesh position directly (no re-render)
-    meshRef.current.position.x = newX;
-    meshRef.current.position.y = newY;
+    // Update group position directly (no re-render)
+    groupRef.current.position.x = newX;
+    groupRef.current.position.y = newY;
 
     // Sync position to store for collision detection
     setPosition({ x: newX, y: newY });
@@ -103,17 +104,8 @@ export function Player() {
   });
 
   return (
-    <mesh
-      ref={meshRef}
-      position={[0, 1, GAME_CONFIG.PLAYER_Z]}
-    >
-      {/* Player ship geometry - white cube for now */}
-      <boxGeometry args={[1, 0.5, 1.5]} />
-      <meshStandardMaterial
-        color={GAME_CONFIG.COLORS.player}
-        emissive={GAME_CONFIG.COLORS.player}
-        emissiveIntensity={0.2}
-      />
-    </mesh>
+    <group ref={groupRef} position={[0, 1, GAME_CONFIG.PLAYER_Z]}>
+      <Rocketship />
+    </group>
   );
 }

@@ -27,7 +27,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Model(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/model.glb') as GLTFResult
+  const { nodes, materials } = useGLTF('/models/tie-fighter.glb') as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group position={[0.68, -0.141, 0.358]} rotation={[-1.794, -0.3, -0.17]} scale={0.736}>
@@ -39,4 +39,4 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/model.glb')
+useGLTF.preload('/models/tie-fighter.glb')

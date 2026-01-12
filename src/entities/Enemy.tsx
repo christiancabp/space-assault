@@ -16,7 +16,7 @@ import * as THREE from 'three';
 import type { Enemy as EnemyType } from '../types/game.types';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useGameStore } from '../stores/gameStore';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 interface EnemyProps {
   enemy: EnemyType;

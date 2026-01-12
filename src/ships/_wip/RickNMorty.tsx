@@ -60,7 +60,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Model(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/model.glb') as GLTFResult
+  const { nodes, materials } = useGLTF('/models/rick-n-morty.glb') as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group position={[30.587, 50.542, 70.812]} rotation={[-Math.PI / 2, 0, 0]} scale={[5.766, 10.36, 5.766]}>
@@ -96,4 +96,4 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/model.glb')
+useGLTF.preload('/models/rick-n-morty.glb')

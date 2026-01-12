@@ -114,7 +114,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Model(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/model.glb') as GLTFResult
+  const { nodes, materials } = useGLTF('/models/time-machine.glb') as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group scale={0.01}>
@@ -210,4 +210,4 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/model.glb')
+useGLTF.preload('/models/time-machine.glb')

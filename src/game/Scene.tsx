@@ -2,7 +2,7 @@
  * Scene - 3D scene setup (lighting, environment)
  *
  * Sets up the basic scene elements that persist throughout the game.
- * Keeps lighting minimal for the clean sci-fi aesthetic.
+ * Space-themed lighting with environment reflections for ship materials.
  *
  * PATTERN: Scene configuration component
  * - Contains camera target, lights, and environment
@@ -11,8 +11,9 @@
 
 import { useRef, useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
+import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 export function Scene() {
   const { camera } = useThree();
@@ -27,28 +28,47 @@ export function Scene() {
 
   return (
     <>
-      {/* Ambient light - soft overall illumination */}
-      <ambientLight intensity={0.4} />
+      {/* Environment for realistic reflections on ship materials */}
+      <Environment preset="night" />
 
-      {/* Directional light - main light source from above/front */}
+      {/* Ambient light - soft overall illumination */}
+      <ambientLight intensity={0.3} />
+
+      {/* Main directional light - simulates distant star */}
       <directionalLight
-        position={[0, 20, -30]}
-        intensity={1}
+        position={[5, 15, -20]}
+        intensity={1.5}
         color="#ffffff"
       />
 
-      {/* Secondary light from behind for rim lighting effect */}
+      {/* Blue rim light from behind - space glow effect */}
       <directionalLight
-        position={[0, 10, 20]}
-        intensity={0.3}
+        position={[-5, 5, 25]}
+        intensity={0.6}
         color="#4a9eff"
       />
 
+      {/* Purple accent light from side - adds depth */}
+      <directionalLight
+        position={[-15, 10, 0]}
+        intensity={0.4}
+        color="#9966ff"
+      />
+
+      {/* Warm accent from opposite side */}
+      <pointLight
+        position={[20, 5, -10]}
+        intensity={15}
+        color="#ff9944"
+        distance={50}
+        decay={2}
+      />
+
       {/* Background color - deep space black */}
-      <color attach="background" args={['#000005']} />
+      <color attach="background" args={['#000008']} />
 
       {/* Fog for depth - objects fade into darkness at distance */}
-      <fog attach="fog" args={['#000005', 30, 80]} />
+      <fog attach="fog" args={['#000008', 30, 80]} />
     </>
   );
 }

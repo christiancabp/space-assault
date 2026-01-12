@@ -18,7 +18,7 @@ import * as THREE from 'three';
 import type { Bullet as BulletType } from '../types/game.types';
 import { useBulletStore } from '../stores/bulletStore';
 import { useGameStore } from '../stores/gameStore';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 interface BulletProps {
   bullet: BulletType;

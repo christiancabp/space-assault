@@ -12,7 +12,7 @@
 
 import { create } from 'zustand';
 import type { Bullet, Vector3 } from '../types/game.types';
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../config';
 
 interface BulletState {
   bullets: Bullet[];
