@@ -34,10 +34,41 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
       },
     ],
   },
+
+  'guardians-ship': {
+    id: 'guardians-ship',
+    displayName: 'Milano',
+    transform: {
+      // Scale to match game units (adjust as needed)
+      scale: [0.0006, 0.0006, 0.0006],
+      // Rotate to face negative Z (toward enemies)
+      rotation: [0, 0, 0],
+      // Center offset if needed
+      positionOffset: [0, 0, 0],
+    },
+    hitbox: {
+      width: 2.5,
+      height: 1,
+      depth: 3,
+    },
+    // Twin wing engines
+    engines: [
+      {
+        position: [-1.5, 0, 1],
+        scale: 0.8,
+        color: '#00aaff'
+      },
+      {
+        position: [1.5, 0, 1],
+        scale: 0.8,
+        color: '#00aaff'
+      },
+    ],
+  },
 };
 
 // Default ship when no selection made
-export const DEFAULT_SHIP_ID: ShipId = 'rocketship';
+export const DEFAULT_SHIP_ID: ShipId = 'guardians-ship';
 
 // Helper to get config with fallback
 export function getShipConfig(shipId: ShipId): ShipConfig {

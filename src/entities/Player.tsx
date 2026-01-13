@@ -21,7 +21,8 @@ import { usePlayerStore } from '../stores/playerStore';
 import { useGameStore } from '../stores/gameStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
 import { GAME_CONFIG } from '../config';
-import { Rocketship } from '../ships';
+import { Rocketship, GuardiansShip } from '../ships';
+import type { ShipId } from '../types/ship.types';
 
 export function Player() {
   // Ref to the group for direct position updates
@@ -43,11 +44,23 @@ export function Player() {
   const prevKeysRef = useRef<Set<string>>(new Set());
   const barrelRoll = useRef({ active: false, direction: 0, startTime: 0, startX: 0 });
 
-  // Store actions
+  // Store state and actions
   const setPosition = usePlayerStore((state) => state.setPosition);
   const setBarrelRolling = usePlayerStore((state) => state.setBarrelRolling);
+  const selectedShipId = usePlayerStore((state) => state.selectedShipId);
   const addBullet = useBulletStore((state) => state.addBullet);
   const phase = useGameStore((state) => state.phase);
+
+  // Render the selected ship component
+  const renderShip = (shipId: ShipId) => {
+    switch (shipId) {
+      case 'guardians-ship':
+        return <GuardiansShip />;
+      case 'rocketship':
+      default:
+        return <Rocketship />;
+    }
+  };
 
   // Game loop - runs every frame
   useFrame((state, delta) => {
@@ -192,7 +205,7 @@ export function Player() {
 
   return (
     <group ref={groupRef} position={[0, 1, GAME_CONFIG.PLAYER_Z]}>
-      <Rocketship />
+      {renderShip(selectedShipId)}
     </group>
   );
 }

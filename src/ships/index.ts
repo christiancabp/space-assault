@@ -6,3 +6,4 @@
  */
 
 export { Rocketship } from './Rocketship';
+export { GuardiansShip } from './GuardiansShip';

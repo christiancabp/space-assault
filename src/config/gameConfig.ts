@@ -32,7 +32,7 @@ export const GAME_CONFIG = {
   // Double-tap barrel roll
   BARREL_ROLL: {
     doubleTapThreshold: 300,           // ms window to detect double-tap
-    duration: 450,                     // ms for full 360° roll
+    duration: 600,                     // ms for full 360° roll
     shiftDistance: 4,                  // units to shift left/right during roll
   },
 
