@@ -11,7 +11,10 @@
 
 import { useRef, useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
-import { Environment } from '@react-three/drei';
+import { 
+  Environment, 
+  // OrbitControls 
+} from '@react-three/drei';
 import * as THREE from 'three';
 import { GAME_CONFIG } from '../config';
 
@@ -69,6 +72,9 @@ export function Scene() {
 
       {/* Fog for depth - objects fade into darkness at distance */}
       <fog attach="fog" args={['#000008', 30, 80]} />
+      
+      {/* OrbitControls for development - can be removed in production */}
+      {/* <OrbitControls /> */}
     </>
   );
 }

@@ -55,12 +55,12 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     engines: [
       {
         position: [-0.3, 0, 0.6],
-        scale: 1.0,
+        scale: 1.2,
         color: '#00aaff'
       },
       {
         position: [0.3, 0, 0.6],
-        scale: 1.0,
+        scale: 1.2,
         color: '#00aaff'
       },
     ],

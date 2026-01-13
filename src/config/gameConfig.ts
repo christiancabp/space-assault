@@ -9,7 +9,7 @@ export const GAME_CONFIG = {
   // ============================================
   // PLAYER SETTINGS
   // ============================================
-  PLAYER_SPEED: 10,                    // Units per second
+  PLAYER_SPEED: 12,                    // Units per second
   PLAYER_START_LIVES: 3,
   PLAYER_Z: 0,                         // Player's fixed Z position
 
@@ -79,7 +79,7 @@ export const GAME_CONFIG = {
   // CAMERA
   // ============================================
   CAMERA: {
-    position: { x: 0, y: 10, z: 10 },  // Behind and above player
+    position: { x: 0, y: 8, z: 10 },  // Behind and above player
     fov: 70,                           // Field of view
     lookAt: { x: 0, y: 0, z: -15 },    // Look forward into play area
   },
@@ -92,18 +92,18 @@ export const GAME_CONFIG = {
     enemy: '#4a9eff',                  // Blue
     bullet: '#ff4444',                 // Red
     bulletEmissive: '#ff0000',
-    stars: '#ffffff',
+    stars: '#ffe65a',
   },
 
   // ============================================
   // STAR FIELD
   // ============================================
   STARS: {
-    count: 800,
-    speed: 30,                         // How fast stars stream past
+    count: 900,
+    speed: 25,                         // How fast stars stream past
     spread: { x: 80, y: 40, z: 100 },  // Star field dimensions
     resetZ: -100,                      // Where stars reset when passing camera
-    despawnZ: 25,                      // When to reset stars
+    despawnZ: 30,                      // When to reset stars
   },
 } as const;
 
