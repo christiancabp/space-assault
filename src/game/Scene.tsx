@@ -11,9 +11,12 @@
 
 import { useRef, useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
-import { Environment } from '@react-three/drei';
+import { Environment, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { GAME_CONFIG } from '../config';
+
+// Toggle for debug mode - enables orbit controls for camera inspection
+const DEBUG_ORBIT_CONTROLS = true;
 
 export function Scene() {
   const { camera } = useThree();
@@ -69,6 +72,9 @@ export function Scene() {
 
       {/* Fog for depth - objects fade into darkness at distance */}
       <fog attach="fog" args={['#000008', 30, 80]} />
+
+      {/* Debug: Orbit controls for camera inspection */}
+      {DEBUG_ORBIT_CONTROLS && <OrbitControls makeDefault />}
     </>
   );
 }

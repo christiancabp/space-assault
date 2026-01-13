@@ -28,7 +28,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     // Single center engine at rear of ship
     engines: [
       {
-        position: [0, 0, 0.5],
+        position: [0, 0, 0],
         scale: 1.0,
         color: '#ff6600' // Optional: override default flame color
       },
@@ -54,13 +54,13 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     // Twin wing engines
     engines: [
       {
-        position: [-1.5, 0, 1],
-        scale: 0.8,
+        position: [-0.3, 0, 0.6],
+        scale: 1.0,
         color: '#00aaff'
       },
       {
-        position: [1.5, 0, 1],
-        scale: 0.8,
+        position: [0.3, 0, 0.6],
+        scale: 1.0,
         color: '#00aaff'
       },
     ],

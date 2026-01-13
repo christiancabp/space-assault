@@ -9,6 +9,7 @@ Title: Guardians of the Galaxy Milano Mandela spaceship
 
 import { useGLTF } from '@react-three/drei'
 import { SHIP_CONFIGS } from '../config/shipConfigs'
+import { EnginePropulsion } from '../effects'
 import type { Mesh } from 'three'
 import type { GLTFResult } from '../types'
 
@@ -78,6 +79,16 @@ export function GuardiansShip() {
         <mesh geometry={(nodes.GotG_MilanoShape_lBottomWinglet_0 as Mesh).geometry} material={materials.lBottomWinglet} />
         <mesh geometry={(nodes.GotG_MilanoShape_rBottomWinglet_0 as Mesh).geometry} material={materials.rBottomWinglet} />
       </group>
+
+      {/* Engine propulsion effects */}
+      {config.engines.map((engine, index) => (
+        <EnginePropulsion
+          key={index}
+          position={engine.position}
+          scale={engine.scale}
+          coreColor={engine.color}
+        />
+      ))}
     </group>
   )
 }

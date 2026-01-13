@@ -9,6 +9,7 @@ Title: Spaceship
 
 import { useGLTF } from '@react-three/drei'
 import { SHIP_CONFIGS } from '../config/shipConfigs'
+import { EnginePropulsion } from '../effects'
 import type { Mesh } from 'three'
 import type { GLTFResult } from '../types'
 
@@ -30,7 +31,15 @@ export function Rocketship() {
         <mesh geometry={(nodes.Object_5 as Mesh).geometry} material={materials.lambert2SG} />
       </group>
 
-      {/* TODO: Add propulsion effects here */}
+      {/* Engine propulsion effects */}
+      {config.engines.map((engine, index) => (
+        <EnginePropulsion
+          key={index}
+          position={engine.position}
+          scale={engine.scale}
+          coreColor={engine.color}
+        />
+      ))}
     </group>
   )
 }
