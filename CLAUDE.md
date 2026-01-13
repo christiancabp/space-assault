@@ -61,6 +61,7 @@ GLB model files are in `public/models/` and loaded at runtime. Ship components i
 | Model File | Component | Status | Description |
 |------------|-----------|--------|-------------|
 | rocketship.glb | `Rocketship.tsx` | Active | Spaceship |
+| guardians-ship.glb | `GuardiansShip.tsx` | Active | Milano from Guardians of the Galaxy |
 | planet-express.glb | `PlanetExpress.tsx` | WIP | Planet Express SpaceShip |
 | rick-n-morty.glb | `RickNMorty.tsx` | WIP | Rick's ship from Rick and Morty |
 | sanitation-ship.glb | `SanitationShip.tsx` | WIP | Space Garbage Truck |
@@ -110,4 +111,5 @@ Configuration is split across `src/config/`:
 
 - WASD / Arrow Keys: Move ship
 - Spacebar: Fire bullets
+- Double-tap Left/Right: Barrel roll (invincible dodge)
 - Enter: Start game, pause/resume, restart after game over

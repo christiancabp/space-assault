@@ -58,6 +58,11 @@ export function StartScreen() {
           <span className="control-label">Move ship</span>
         </div>
         <div className="control-row">
+          <span className="key-group">Double-tap</span>
+          <span className="control-label">&larr; or &rarr;</span>
+          <span className="control-label">Barrel roll (dodge)</span>
+        </div>
+        <div className="control-row">
           <span className="key-group">SPACE</span>
           <span className="control-label">Fire weapons</span>
         </div>
