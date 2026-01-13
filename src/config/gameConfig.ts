@@ -79,7 +79,7 @@ export const GAME_CONFIG = {
   // CAMERA
   // ============================================
   CAMERA: {
-    position: { x: 0, y: 6, z: 10 },  // Behind and above player
+    position: { x: 0, y: 10, z: 10 },  // Behind and above player
     fov: 70,                           // Field of view
     lookAt: { x: 0, y: 0, z: -15 },    // Look forward into play area
   },

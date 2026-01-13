@@ -74,7 +74,7 @@ export function Scene() {
       <fog attach="fog" args={['#000008', 30, 80]} />
 
       {/* Debug: Orbit controls for camera inspection */}
-      {DEBUG_ORBIT_CONTROLS && <OrbitControls makeDefault />}
+      {/* {DEBUG_ORBIT_CONTROLS && <OrbitControls makeDefault />} */}
     </>
   );
 }
