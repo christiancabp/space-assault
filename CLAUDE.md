@@ -41,8 +41,6 @@ src/
 ├── game/                   # R3F Canvas, Scene, GameLoop
 ├── hooks/                  # Custom hooks (keyboard input)
 ├── ships/                  # Ship components (gltfjsx-generated)
-│   ├── Rocketship.tsx      # Active ship component
-│   └── _wip/               # Ships needing TypeScript fixes
 ├── stores/                 # Zustand stores (game, player, enemy, bullet)
 ├── systems/                # Game systems (collision detection)
 ├── types/                  # TypeScript type definitions
@@ -62,16 +60,15 @@ GLB model files are in `public/models/` and loaded at runtime. Ship components i
 |------------|-----------|--------|-------------|
 | rocketship.glb | `Rocketship.tsx` | Active | Spaceship |
 | guardians-ship.glb | `GuardiansShip.tsx` | Active | Milano from Guardians of the Galaxy |
-| planet-express.glb | `PlanetExpress.tsx` | WIP | Planet Express SpaceShip |
-| rick-n-morty.glb | `RickNMorty.tsx` | WIP | Rick's ship from Rick and Morty |
-| sanitation-ship.glb | `SanitationShip.tsx` | WIP | Space Garbage Truck |
-| sayan-capsule.glb | `SayanCapsule.tsx` | WIP | Vegeta SpaceShip |
-| space-shuttle.glb | `SpaceShuttle.tsx` | WIP | Space Shuttle |
-| starship.glb | `Starship.tsx` | WIP | SpaceX Starship |
-| tie-fighter.glb | `TieFighter.tsx` | WIP | T.I.E Fighter |
-| time-machine.glb | `TimeMachine.tsx` | WIP | Dragon Ball Time Machine |
+| planet-express.glb | `PlanetExpress.tsx` | Active | Planet Express SpaceShip |
+| rick-n-morty.glb | `RickNMorty.tsx` | Active | Rick's ship from Rick and Morty |
+| sayan-capsule.glb | `SayanCapsule.tsx` | Active | Vegeta SpaceShip |
+| space-shuttle.glb | `SpaceShuttle.tsx` | Active | Space Shuttle |
+| starship.glb | `Starship.tsx` | Active | SpaceX Starship |
+| tie-fighter.glb | `TieFighter.tsx` | Active | T.I.E Fighter |
+| time-machine.glb | `TimeMachine.tsx` | Active | Dragon Ball Time Machine |
 
-WIP ships are in `src/ships/_wip/` and need TypeScript fixes before activation. All models are CC-BY-4.0 licensed.
+All models are CC-BY-4.0 licensed. `scripts/measure-glb.mjs` prints each model's bounding box and center (useful for setting `shipConfigs.ts` scale/offset values).
 
 ### Key Patterns
 

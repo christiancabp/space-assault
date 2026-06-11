@@ -67,12 +67,15 @@ export function EnginePropulsion({
     }
   });
 
-  // Flame geometry - cone pointing backward (positive Z in ship space)
-  const flameLength = 0.8 * scale * length;
-  const flameRadius = 0.25 * scale;
+  // Flame geometry - cone pointing backward (positive Z in ship space).
+  // Keep the geometry at unit size and scale the group instead: the flame
+  // shader's shape/falloff constants assume these local dimensions, so baking
+  // scale into the geometry makes the flame fade out (invisible at scale ≳ 1.5).
+  const flameLength = 0.8 * length;
+  const flameRadius = 0.25;
 
   return (
-    <group position={position}>
+    <group position={position} scale={scale}>
       {/* Main flame cone */}
       <mesh
         ref={meshRef}

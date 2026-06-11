@@ -9,8 +9,16 @@ import type { ObjectMap } from '@react-three/fiber'
  */
 
 // Available ship identifiers
-// Future: | 'tie-fighter' | 'planet-express' | 'starship' | etc.
-export type ShipId = 'rocketship' | 'guardians-ship';
+export type ShipId =
+  | 'rocketship'
+  | 'guardians-ship'
+  | 'planet-express'
+  | 'rick-n-morty'
+  | 'sayan-capsule'
+  | 'space-shuttle'
+  | 'starship'
+  | 'tie-fighter'
+  | 'time-machine';
 
 // Engine mount for propulsion effects (future use)
 export interface EngineMount {
