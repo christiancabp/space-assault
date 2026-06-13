@@ -220,3 +220,90 @@ html, body, #root {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
+
+/* Secondary (ghost) button variant for menu overlays */
+.menu-overlay button.secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.menu-overlay button.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+}
+
+/* ── Ship snapshot (main menu) ─────────────────────────────── */
+.ship-snapshot-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.ship-snapshot {
+  width: 240px;
+  height: 160px;
+  background: radial-gradient(ellipse at center, rgba(74, 158, 255, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.menu-overlay .change-ship {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* ── Ship selector overlay ─────────────────────────────────── */
+.ship-selector h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ship-stage {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ship-preview {
+  width: min(68vw, 600px);
+  height: min(50vh, 420px);
+}
+
+.menu-overlay .ship-nav-arrow {
+  margin-top: 0;
+  padding: 0.5rem 1.1rem;
+  font-size: 2rem;
+  line-height: 1;
+  border-radius: 8px;
+}
+
+.ship-name {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(74, 158, 255, 0.6);
+}
+
+.ship-index {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ship-select-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.menu-overlay .ship-select-buttons button {
+  margin-top: 0;
+}

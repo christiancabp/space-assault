@@ -14,12 +14,17 @@ import { useGameStore } from '../stores/gameStore';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
+import { getShipConfig } from '../config/shipConfigs';
+import { ShipPreviewCanvas } from '../shipSelector/ShipPreviewCanvas';
 
 export function StartScreen() {
   const startGame = useGameStore((state) => state.startGame);
+  const openShipSelect = useGameStore((state) => state.openShipSelect);
   const clearEnemies = useEnemyStore((state) => state.clearEnemies);
   const clearBullets = useBulletStore((state) => state.clearBullets);
   const resetPlayer = usePlayerStore((state) => state.resetPlayer);
+  const selectedShipId = usePlayerStore((state) => state.selectedShipId);
+  const selectedShipName = getShipConfig(selectedShipId).displayName;
 
   // Handle game start - clear any leftover state and begin
   const handleStart = useCallback(() => {
@@ -48,6 +53,16 @@ export function StartScreen() {
   return (
     <div className="menu-overlay">
       <h1>SPACE ASSAULT</h1>
+
+      <div className="ship-snapshot-section">
+        <div className="ship-snapshot">
+          <ShipPreviewCanvas shipId={selectedShipId} />
+        </div>
+        <div className="ship-name">{selectedShipName}</div>
+        <button className="secondary change-ship" onClick={openShipSelect}>
+          CHANGE SHIP
+        </button>
+      </div>
 
       <div className="controls-info">
         <h2>CONTROLS</h2>

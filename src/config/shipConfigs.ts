@@ -18,7 +18,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
       // Rotate to face negative Z (toward enemies)
       rotation: [Math.PI, 0, 0],
       // Center offset if needed
-      positionOffset: [0, 0, 0],
+      positionOffset: [0, 0, 1],
     },
     hitbox: {
       width: 1,
@@ -28,8 +28,8 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     // Single center engine at rear of ship
     engines: [
       {
-        position: [0, 0, 0],
-        scale: 1.2,
+        position: [0, 0, 1],
+        scale: 1.4,
         color: '#ff6600' // Optional: override default flame color
       },
     ],
@@ -66,15 +66,10 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     ],
   },
 
-  // ── New ships below: scale/offset derived from measured GLB bounding boxes
-  // (scripts/measure-glb.mjs) so each ship starts at ~3 game units across.
-  // Rotation, engine mounts, and fine-tuning still need in-game adjustment.
-
   'planet-express': {
     id: 'planet-express',
     displayName: 'Planet Express',
     transform: {
-      // Raw model: 57.3 x 26.9 x 19.2, off-center at [-4.4, -51.5, -50.9]
       // positionOffset = -(rotation × scale × model center) — recompute if rotation changes
       scale: [0.07, 0.07, 0.07],
       rotation: [0, Math.PI / 2, 0],
@@ -105,19 +100,19 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
       positionOffset: [0, -0.66, 0],
     },
     hitbox: {
-      width: 3,
-      height: 2.4,
+      width: 2,
+      height: 2,
       depth: 2,
     },
-    // Single rear thruster
+    // Dual rear thruster
     engines: [
       {
-        position: [0.9, 0.05, 0.6],
+        position: [0.9, 0.05, 0.4],
         scale: 1.3,
         color: '#7fff00'
       },
       {
-        position: [-0.9, 0.05, 0.6],
+        position: [-0.9, 0.05, 0.4],
         scale: 1.3,
         color: '#7fff00'
       },
@@ -129,21 +124,21 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     displayName: 'Saiyan Capsule',
     transform: {
       // Raw model: 0.72 unit sphere, perfectly centered
-      scale: [4, 4, 4],
-      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      rotation: [0, Math.PI, 0],
       positionOffset: [0, 0, 0],
     },
     hitbox: {
-      width: 2.9,
-      height: 2.9,
-      depth: 2.9,
+      width: 1,
+      height: 1,
+      depth: 1,
     },
     // Single rear thruster
     engines: [
       {
-        position: [0, 0, 1.5],
-        scale: 1.2,
-        color: '#ff6600'
+        position: [0, 0, 0.5],
+        scale: 3,
+        color: '#ffffff'
       },
     ],
   },
@@ -154,28 +149,28 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     transform: {
       // Raw model: 81 x 30 x 51, slightly off-center
       scale: [0.04, 0.04, 0.04],
-      rotation: [0, 0, 0],
-      positionOffset: [-0.16, -0.32, 0],
+      rotation: [0, -Math.PI/2, 0],
+      positionOffset: [0, 0, -0.1],
     },
     hitbox: {
-      width: 3.2,
+      width: 2,
       height: 1.2,
       depth: 2,
     },
     // Three main engines clustered at rear
     engines: [
       {
-        position: [0, 0.2, 1],
+        position: [0, 0.15, 1.5],
         scale: 1,
         color: '#ffaa33'
       },
       {
-        position: [-0.25, -0.1, 1],
+        position: [-0.19, -0.1, 1.5],
         scale: 1,
         color: '#ffaa33'
       },
       {
-        position: [0.25, -0.1, 1],
+        position: [0.19, -0.1, 1.5],
         scale: 1,
         color: '#ffaa33'
       },
@@ -193,15 +188,15 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
       positionOffset: [0, 0.01, -1.59],
     },
     hitbox: {
-      width: 1.2,
+      width: 1,
       height: 0.7,
-      depth: 3.2,
+      depth: 3,
     },
     // Raptor engine cluster at rear
     engines: [
       {
-        position: [0, 0, 1.6],
-        scale: 1.4,
+        position: [0, 0, 2],
+        scale: 2.5,
         color: '#9955ff'
       },
     ],
@@ -211,27 +206,23 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     id: 'tie-fighter',
     displayName: 'TIE Fighter',
     transform: {
-      // Raw model: 5.8 x 6.6 x 5.5, off-center at [2.1, 2.4, -2.0]
+      // Raw model: 5.8 x 6.6 x 5.5, off-center at [2.135, 2.424, -2.022]
+      // positionOffset = -(rotation × scale × model center) — recompute if rotation changes
       scale: [0.45, 0.45, 0.45],
-      rotation: [0, 0, 0],
-      positionOffset: [-0.96, -1.09, 0.91],
+      rotation: [Math.PI / 2, 0, 0],
+      positionOffset: [-0.9, 1.1, -1],
     },
     hitbox: {
-      width: 2.6,
-      height: 3,
-      depth: 2.5,
+      width: 2,
+      height: 2,
+      depth: 2,
     },
     // Twin ion engines at rear of pod
     engines: [
       {
-        position: [-0.2, 0, 1.3],
-        scale: 1,
-        color: '#00ffaa'
-      },
-      {
-        position: [0.2, 0, 1.3],
-        scale: 1,
-        color: '#00ffaa'
+        position: [0, 0, 0.5],
+        scale: 2,
+        color: '#9955ff'
       },
     ],
   },
@@ -242,8 +233,8 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     transform: {
       // Raw model: 5.9 x 4.1 x 5.9, sits 2.6 units up
       scale: [0.5, 0.5, 0.5],
-      rotation: [0, 0, 0],
-      positionOffset: [-0.08, -1.32, -0.08],
+      rotation: [(-Math.PI / 2), 0, 0],
+      positionOffset: [0, 0, 1],
     },
     hitbox: {
       width: 3,
@@ -253,7 +244,27 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
     // Single thruster under the pod
     engines: [
       {
-        position: [0, -0.5, 1.4],
+        position: [0,0.65,0.5],
+        scale: 1.2,
+        color: '#ffee44'
+      },
+      {
+        position: [0.6,0.2,0.5],
+        scale: 1.2,
+        color: '#ffee44'
+      },
+      {
+        position: [-0.6,0.2,0.5],
+        scale: 1.2,
+        color: '#ffee44'
+      },
+      {
+        position: [0.4, -0.5, 0.5],
+        scale: 1.2,
+        color: '#ffee44'
+      },
+      {
+        position: [-0.4, -0.5, 0.5],
         scale: 1.2,
         color: '#ffee44'
       },
@@ -261,8 +272,21 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   },
 };
 
+// Roster order for browsing in the ship selector
+export const SHIP_IDS: ShipId[] = [
+  'rocketship',
+  'guardians-ship',
+  'planet-express',
+  'rick-n-morty',
+  'sayan-capsule',
+  'space-shuttle',
+  'starship',
+  'tie-fighter',
+  'time-machine',
+];
+
 // Default ship when no selection made
-export const DEFAULT_SHIP_ID: ShipId = 'rick-n-morty';
+export const DEFAULT_SHIP_ID: ShipId = 'tie-fighter';
 
 // Helper to get config with fallback
 export function getShipConfig(shipId: ShipId): ShipConfig {

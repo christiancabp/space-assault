@@ -36,10 +36,11 @@ export interface Bullet extends Entity {
 
 // Game state machine phases
 // 'menu' - title screen, waiting to start
+// 'shipSelect' - choosing a ship from the roster
 // 'playing' - active gameplay
 // 'paused' - game paused (future feature)
 // 'gameOver' - player lost, showing results
-export type GamePhase = 'menu' | 'playing' | 'paused' | 'gameOver';
+export type GamePhase = 'menu' | 'shipSelect' | 'playing' | 'paused' | 'gameOver';
 
 // Player state shape
 export interface PlayerState {

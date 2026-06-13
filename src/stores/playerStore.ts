@@ -11,6 +11,7 @@
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { Vector3 } from '../types/game.types';
 import type { ShipId } from '../types/ship.types';
 import { GAME_CONFIG } from '../config';
@@ -44,40 +45,50 @@ const INITIAL_POSITION: Vector3 = {
   z: GAME_CONFIG.PLAYER_Z,
 };
 
-export const usePlayerStore = create<PlayerState>((set) => ({
-  position: { ...INITIAL_POSITION },
-  isInvulnerable: false,
-  isBarrelRolling: false,
-  selectedShipId: DEFAULT_SHIP_ID,
-
-  // Update position (partial updates allowed)
-  setPosition: (pos) => {
-    set((state) => ({
-      position: { ...state.position, ...pos },
-    }));
-  },
-
-  // Toggle invulnerability (used after getting hit)
-  setInvulnerable: (value) => {
-    set({ isInvulnerable: value });
-  },
-
-  // Toggle barrel rolling state (grants invincibility)
-  setBarrelRolling: (value) => {
-    set({ isBarrelRolling: value });
-  },
-
-  // Select a ship
-  setShipId: (id) => {
-    set({ selectedShipId: id });
-  },
-
-  // Reset player to starting position
-  resetPlayer: () => {
-    set({
+export const usePlayerStore = create<PlayerState>()(
+  persist(
+    (set) => ({
       position: { ...INITIAL_POSITION },
       isInvulnerable: false,
       isBarrelRolling: false,
-    });
-  },
-}));
+      selectedShipId: DEFAULT_SHIP_ID,
+
+      // Update position (partial updates allowed)
+      setPosition: (pos) => {
+        set((state) => ({
+          position: { ...state.position, ...pos },
+        }));
+      },
+
+      // Toggle invulnerability (used after getting hit)
+      setInvulnerable: (value) => {
+        set({ isInvulnerable: value });
+      },
+
+      // Toggle barrel rolling state (grants invincibility)
+      setBarrelRolling: (value) => {
+        set({ isBarrelRolling: value });
+      },
+
+      // Select a ship
+      setShipId: (id) => {
+        set({ selectedShipId: id });
+      },
+
+      // Reset player to starting position
+      resetPlayer: () => {
+        set({
+          position: { ...INITIAL_POSITION },
+          isInvulnerable: false,
+          isBarrelRolling: false,
+        });
+      },
+    }),
+    {
+      name: 'space-assault-player',
+      // Only persist the ship choice — position and combat flags are
+      // transient gameplay state that should reset each session.
+      partialize: (state) => ({ selectedShipId: state.selectedShipId }),
+    }
+  )
+);

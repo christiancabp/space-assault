@@ -16,6 +16,7 @@ import { HUD } from './ui/HUD';
 import { StartScreen } from './ui/StartScreen';
 import { GameOverScreen } from './ui/GameOverScreen';
 import { PauseScreen } from './ui/PauseScreen';
+import { ShipSelector } from './shipSelector/ShipSelector';
 import { useGameStore } from './stores/gameStore';
 import './index.css';
 
@@ -44,6 +45,7 @@ function App() {
 
       {/* HTML UI Overlays - conditionally rendered based on phase */}
       {phase === 'menu' && <StartScreen />}
+      {phase === 'shipSelect' && <ShipSelector />}
       {(phase === 'playing' || phase === 'paused') && <HUD />}
       {phase === 'paused' && <PauseScreen />}
       {phase === 'gameOver' && <GameOverScreen />}

@@ -25,6 +25,8 @@ interface GameState {
   endGame: () => void;
   pauseGame: () => void;
   resumeGame: () => void;
+  openShipSelect: () => void;
+  closeShipSelect: () => void;
   addScore: (points: number) => void;
   loseLife: () => void;
   resetGame: () => void;
@@ -62,6 +64,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (get().phase === 'paused') {
       set({ phase: 'playing' });
     }
+  },
+
+  // Open the ship selector (reached from the menu)
+  openShipSelect: () => {
+    set({ phase: 'shipSelect' });
+  },
+
+  // Close the ship selector and return to the menu
+  closeShipSelect: () => {
+    set({ phase: 'menu' });
   },
 
   // Add points to score

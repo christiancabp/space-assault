@@ -2,6 +2,7 @@
  * Ships - Ship component exports
  */
 
+export { ShipModel } from './ShipModel';
 export { Rocketship } from './Rocketship';
 export { GuardiansShip } from './GuardiansShip';
 export { PlanetExpress } from './PlanetExpress';

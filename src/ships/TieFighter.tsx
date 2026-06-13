@@ -24,7 +24,7 @@ export function TieFighter() {
         rotation={config.transform.rotation}
         position={config.transform.positionOffset}
       >
-          <group position={[0.68, -0.141, 0.358]} rotation={[-1.794, -0.3, -0.17]} scale={0.736}>
+          <group position={[0,0,0]} rotation={[0,0,0]} scale={0.736}>
             <mesh geometry={(nodes.Object_2 as Mesh).geometry} material={materials['Material.001']} />
             <mesh geometry={(nodes.Object_3 as Mesh).geometry} material={materials['Material.002']} />
             <mesh geometry={(nodes.Object_4 as Mesh).geometry} material={materials['Material.003']} />

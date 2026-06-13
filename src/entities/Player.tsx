@@ -21,18 +21,7 @@ import { usePlayerStore } from '../stores/playerStore';
 import { useGameStore } from '../stores/gameStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
 import { GAME_CONFIG } from '../config';
-import {
-  Rocketship,
-  GuardiansShip,
-  PlanetExpress,
-  RickNMorty,
-  SayanCapsule,
-  SpaceShuttle,
-  Starship,
-  TieFighter,
-  TimeMachine,
-} from '../ships';
-import type { ShipId } from '../types/ship.types';
+import { ShipModel } from '../ships';
 
 export function Player() {
   // Ref to the group for direct position updates
@@ -60,31 +49,6 @@ export function Player() {
   const selectedShipId = usePlayerStore((state) => state.selectedShipId);
   const addBullet = useBulletStore((state) => state.addBullet);
   const phase = useGameStore((state) => state.phase);
-
-  // Render the selected ship component
-  const renderShip = (shipId: ShipId) => {
-    switch (shipId) {
-      case 'guardians-ship':
-        return <GuardiansShip />;
-      case 'planet-express':
-        return <PlanetExpress />;
-      case 'rick-n-morty':
-        return <RickNMorty />;
-      case 'sayan-capsule':
-        return <SayanCapsule />;
-      case 'space-shuttle':
-        return <SpaceShuttle />;
-      case 'starship':
-        return <Starship />;
-      case 'tie-fighter':
-        return <TieFighter />;
-      case 'time-machine':
-        return <TimeMachine />;
-      case 'rocketship':
-      default:
-        return <Rocketship />;
-    }
-  };
 
   // Game loop - runs every frame
   useFrame((state, delta) => {
@@ -229,7 +193,7 @@ export function Player() {
 
   return (
     <group ref={groupRef} position={[0, 1, GAME_CONFIG.PLAYER_Z]}>
-      {renderShip(selectedShipId)}
+      <ShipModel shipId={selectedShipId} />
     </group>
   );
 }
