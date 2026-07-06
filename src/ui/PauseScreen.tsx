@@ -11,6 +11,7 @@ import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useEffectsStore } from '../stores/effectsStore';
+import { AudioSettings } from './AudioSettings';
 
 export function PauseScreen() {
   const resumeGame = useGameStore((state) => state.resumeGame);
@@ -52,6 +53,8 @@ export function PauseScreen() {
       <h1>PAUSED</h1>
 
       <p>Press ENTER to resume</p>
+
+      <AudioSettings />
 
       <div className="pause-buttons">
         <button onClick={handleResume}>RESUME</button>

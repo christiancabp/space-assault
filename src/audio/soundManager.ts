@@ -6,6 +6,10 @@
  * - Gain graph: sfx/music buses -> master -> destination
  * - SFX play with slight random pitch variance so rapid fire doesn't sound robotic
  * - Music follows the game phase (start on play, duck on pause, stop on game over)
+ * - Bus volumes/mutes come from settingsStore (user-adjustable, persisted);
+ *   slider values are squared before hitting the gain node because perceived
+ *   loudness is logarithmic - a linear mapping crams all audible change
+ *   into the bottom of the slider
  *
  * RESILIENCE: every step is wrapped - if the context can't start or a file
  * fails to decode, the game simply runs silent (warnings in console).
@@ -16,6 +20,7 @@
  */
 
 import { useGameStore } from '../stores/gameStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import { GAME_CONFIG } from '../config';
 
 export type SfxName = 'laser' | 'explosion' | 'playerHit' | 'gameOver';
@@ -40,6 +45,7 @@ let sfxGain: GainNode | null = null;
 let musicGain: GainNode | null = null;
 let musicSource: AudioBufferSourceNode | null = null;
 let initialized = false;
+let duckFactor = 1; // 1 while playing, AUDIO.pauseDuck while paused
 
 const buffers = new Map<string, AudioBuffer>();
 
@@ -72,17 +78,19 @@ export function initAudio(): void {
     masterGain.connect(ctx.destination);
 
     sfxGain = ctx.createGain();
-    sfxGain.gain.value = AUDIO.sfxVolume;
     sfxGain.connect(masterGain);
 
     musicGain = ctx.createGain();
-    musicGain.gain.value = AUDIO.musicVolume;
     musicGain.connect(masterGain);
   } catch (error) {
     console.warn('[audio] Web Audio unavailable - running silent', error);
     ctx = null;
     return;
   }
+
+  // Apply persisted user volumes/mutes now and on every settings change
+  applyAudioSettings();
+  useSettingsStore.subscribe(() => applyAudioSettings());
 
   // Preload everything in the background
   Object.values(SFX_FILES).forEach((url) => void loadBuffer(url));
@@ -141,10 +149,21 @@ function stopMusic(): void {
   }
 }
 
-/** Set the music bus volume with a short ramp to avoid clicks */
-function setMusicVolume(volume: number): void {
-  if (!ctx || !musicGain) return;
-  musicGain.gain.setTargetAtTime(volume, ctx.currentTime, 0.1);
+/**
+ * Apply user volume/mute settings (and the pause duck) to the buses.
+ * Squares the slider values for a perceptually even loudness ramp;
+ * short setTargetAtTime ramps avoid clicks.
+ */
+function applyAudioSettings(): void {
+  if (!ctx || !sfxGain || !musicGain) return;
+  const { musicVolume, sfxVolume, musicMuted, sfxMuted } =
+    useSettingsStore.getState();
+
+  const sfx = sfxMuted ? 0 : sfxVolume * sfxVolume;
+  const music = musicMuted ? 0 : musicVolume * musicVolume * duckFactor;
+
+  sfxGain.gain.setTargetAtTime(sfx, ctx.currentTime, 0.1);
+  musicGain.gain.setTargetAtTime(music, ctx.currentTime, 0.1);
 }
 
 function handlePhaseChange(phase: string, prevPhase: string): void {
@@ -155,16 +174,16 @@ function handlePhaseChange(phase: string, prevPhase: string): void {
       // Phase changes fire synchronously from a click/keypress, so this
       // resume() happens inside a valid user gesture
       void ctx.resume().catch(() => {});
-      if (prevPhase === 'paused') {
-        setMusicVolume(AUDIO.musicVolume); // Un-duck
-      } else {
-        setMusicVolume(AUDIO.musicVolume);
+      duckFactor = 1;
+      applyAudioSettings();
+      if (prevPhase !== 'paused') {
         startMusic();
       }
       break;
 
     case 'paused':
-      setMusicVolume(AUDIO.musicVolume * AUDIO.pauseDuck);
+      duckFactor = AUDIO.pauseDuck;
+      applyAudioSettings();
       break;
 
     case 'gameOver':

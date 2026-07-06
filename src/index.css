@@ -81,7 +81,9 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
+  overflow-y: auto;
+  padding: 2rem 0;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.9) 100%);
   text-align: center;
 }
@@ -206,6 +208,68 @@ html, body, #root {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
   box-shadow: none;
+}
+
+/* ── Audio settings panel (start + pause screens) ──────────── */
+.audio-settings {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(74, 158, 255, 0.1);
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  border-radius: 8px;
+}
+
+.audio-settings h2 {
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.75rem;
+  color: var(--color-accent);
+}
+
+.audio-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.audio-row:last-child {
+  margin-bottom: 0;
+}
+
+.audio-label {
+  width: 4.5rem;
+  text-align: right;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.menu-overlay button.audio-mute {
+  margin-top: 0;
+  padding: 0.2rem 0.4rem;
+  font-size: 1rem;
+  line-height: 1;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: transparent;
+}
+
+.menu-overlay button.audio-mute:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.audio-slider {
+  width: 160px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.audio-slider:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* Start/restart hint text */

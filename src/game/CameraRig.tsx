@@ -23,35 +23,28 @@ interface ShakeOffset {
 }
 
 /**
- * TODO(chrisb): implement the shake curve — this function defines how a hit FEELS.
+ * Map trauma (0..1) + elapsed time to a camera offset.
  *
- * Map trauma (0..1) + elapsed time to a camera offset. Config knobs available:
- *   SCREEN_SHAKE.maxOffset   - max positional shake at trauma=1 (0.45 units)
- *   SCREEN_SHAKE.maxRoll     - max roll at trauma=1 (0.06 rad)
- *   SCREEN_SHAKE.frequency   - oscillation speed (22)
+ * - trauma² makes small hits whisper and big hits slam
+ * - Two detuned sine waves per axis (incommensurate frequencies + phase
+ *   offsets) so the motion reads as chaotic impact, not a metronome
+ * - Roll carries most of the perceived violence; even a tiny rotation
+ *   amplitude is felt more than positional offset
  *
- * Things to consider:
- * - Use trauma * trauma so shake ramps in hard and tails off gently.
- * - Pure sin(time * frequency) looks mechanical; sampling two sine waves at
- *   different frequencies/phases per axis (e.g. sin(t*f) and sin(t*f*1.3 + 7))
- *   reads as chaotic, which feels more like an impact.
- * - Roll (rotation) sells the shake more than position does — even a tiny
- *   roll amplitude is felt. Games like Nuclear Throne shake almost entirely
- *   with rotation.
- *
- * A minimal working version (feel free to start here and iterate):
- *   const shake = trauma * trauma;
- *   return {
- *     x: SCREEN_SHAKE.maxOffset * shake * Math.sin(time * SCREEN_SHAKE.frequency),
- *     y: SCREEN_SHAKE.maxOffset * shake * Math.sin(time * SCREEN_SHAKE.frequency * 1.3 + 7),
- *     roll: SCREEN_SHAKE.maxRoll * shake * Math.sin(time * SCREEN_SHAKE.frequency * 0.9 + 3),
- *   };
+ * Tune via SCREEN_SHAKE in gameConfig.ts (maxOffset, maxRoll, frequency).
  */
 function computeShakeOffset(trauma: number, time: number): ShakeOffset {
-  // Placeholder: no shake until implemented (game runs fine without it)
-  void trauma;
-  void time;
-  return { x: 0, y: 0, roll: 0 };
+  const shake = trauma * trauma;
+  const f = SCREEN_SHAKE.frequency;
+
+  return {
+    x: SCREEN_SHAKE.maxOffset * shake *
+      (Math.sin(time * f) * 0.6 + Math.sin(time * f * 1.7 + 2.3) * 0.4),
+    y: SCREEN_SHAKE.maxOffset * shake *
+      (Math.sin(time * f * 1.3 + 7.1) * 0.6 + Math.sin(time * f * 0.8 + 4.9) * 0.4),
+    roll: SCREEN_SHAKE.maxRoll * shake *
+      (Math.sin(time * f * 0.9 + 3.7) * 0.7 + Math.sin(time * f * 1.5 + 1.2) * 0.3),
+  };
 }
 
 export function CameraRig() {

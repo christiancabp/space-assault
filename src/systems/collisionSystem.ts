@@ -146,9 +146,11 @@ export function checkCollisions(): void {
         enemiesToRemove.add(enemy.id);
         loseLife();
 
-        // Feedback: burst at the impact, heavy shake, hit sound
+        // Feedback: burst at the impact, heavy shake, explosion layered
+        // under the hit tone for weight
         spawnExplosion(enemy.position, GAME_CONFIG.COLORS.bullet);
         addTrauma(GAME_CONFIG.SCREEN_SHAKE.traumaPerHit);
+        playSfx('explosion');
         playSfx('playerHit');
 
         // Brief invulnerability

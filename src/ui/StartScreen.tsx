@@ -17,6 +17,7 @@ import { usePlayerStore } from '../stores/playerStore';
 import { useEffectsStore } from '../stores/effectsStore';
 import { getShipConfig } from '../config/shipConfigs';
 import { ShipPreviewCanvas } from '../shipSelector/ShipPreviewCanvas';
+import { AudioSettings } from './AudioSettings';
 
 export function StartScreen() {
   const startGame = useGameStore((state) => state.startGame);
@@ -89,6 +90,8 @@ export function StartScreen() {
           <span className="control-label">Pause game</span>
         </div>
       </div>
+
+      <AudioSettings />
 
       <p className="start-hint">Press ENTER to start</p>
       <button onClick={handleStart}>START GAME</button>
