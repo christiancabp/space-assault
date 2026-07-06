@@ -76,7 +76,7 @@ src/
 ├── hooks/            # Keyboard input
 ├── input/            # Touch input + fullscreen helper
 ├── invaders/         # Enemy model renderer
-├── ships/            # Ship components (gltfjsx-generated)
+├── ships/            # Ship model renderer (config-driven)
 ├── shipSelector/     # Ship carousel
 ├── stores/           # Zustand stores (game, player, enemy, bullet, effects, settings, playArea)
 ├── systems/          # Collision detection
@@ -90,9 +90,10 @@ All gameplay values live in `src/config/gameConfig.ts` — player/bullet/enemy s
 
 ## Credits
 
-All third-party assets are Creative Commons licensed:
+All third-party assets are Creative Commons licensed and credited on the in-game CREDITS screen:
 
-- **Ship models** — CC-BY-4.0, authors credited in each `src/ships/*.tsx` header (via Sketchfab)
+- **Ship models** — CC-BY-4.0 via Sketchfab, see [`public/models/ATTRIBUTION.md`](public/models/ATTRIBUTION.md)
 - **Invader models** — CC-BY-4.0 by [nitwit.friends](https://sketchfab.com/nitwit.friends) and [alban](https://sketchfab.com/alban) (via Sketchfab), see `src/invaders/InvaderModel.tsx`
 - **Sound effects & music** — CC0, see [`public/sounds/ATTRIBUTION.md`](public/sounds/ATTRIBUTION.md)
 - **Nebula texture** — CC0 by Screaming Brain Studios, see [`public/textures/ATTRIBUTION.md`](public/textures/ATTRIBUTION.md)
+- **Night HDRI** — CC0 by Greg Zaal (Poly Haven), see [`public/hdri/ATTRIBUTION.md`](public/hdri/ATTRIBUTION.md)

@@ -97,13 +97,25 @@
 - [x] Audio settings (music/SFX volume + mute, persisted)
 - [x] Fullscreen on mobile game start (+ home-screen standalone metas for iPhone)
 
-## Phase 3: Deployment & Hardening (Next)
+## Phase 3: Deployment & Hardening - COMPLETE!
 
-- [ ] Host on a real URL (Vercel/Netlify/S3 - decide)
-- [ ] Code-split the 1.35 MB bundle (three.js/postprocessing chunks)
-- [ ] Bundle the drei Environment HDR locally (currently fetched from an external CDN at runtime)
-- [ ] Error boundary around the Canvas + favicon/meta/social tags
-- [ ] PWA manifest (icon, name, display: standalone)
+- [x] Host on a real URL (Vercel: https://space-assault.vercel.app/)
+- [x] Compress ship GLBs 65 MB → 5.6 MB (gltf-transform: meshopt + WebP textures @1024;
+      ship components rewritten to config-driven drei `<Clone>` — see ShipModel.tsx)
+- [x] Lazy ship loading: only the persisted selection preloads at boot; other ships
+      stream on demand in the selector
+- [x] Code-split the bundle (react/three/r3f vendor chunks; game code is its own ~48 KB chunk)
+- [x] Bundle the drei Environment HDR locally (public/hdri/night.hdr, CC0)
+- [x] nebula.png → nebula.webp (1.3 MB → 86 KB)
+- [x] Error boundary around the Canvas (SIGNAL LOST fallback + webglcontextlost)
+      (recovery-strategy TODO in src/ui/CanvasErrorBoundary.tsx)
+- [x] Favicon/meta/social tags (invader icon.svg + PNG sizes, OG/twitter tags)
+- [x] PWA manifest (icons, display: standalone, portrait)
+- [x] vercel.json immutable cache headers for /models /sounds /textures /hdri
+- [x] In-game CREDITS screen attributing all models/audio/art
+- [ ] Runtime perf refactors (deferred): per-frame store churn → mutable position
+      registry; star streaming on the GPU (spec C7–C8 in
+      docs/superpowers/specs/2026-07-06-deployment-perf-plan.md)
 
 ## Phase 4: Gameplay Depth (Future)
 

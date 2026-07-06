@@ -45,6 +45,7 @@ export interface ShipHitbox {
 export interface ShipConfig {
   id: ShipId;
   displayName: string;
+  modelPath: string; // GLB under public/models/
   transform: ShipTransform;
   hitbox: ShipHitbox;
   engines: EngineMount[]; // For future propulsion effects

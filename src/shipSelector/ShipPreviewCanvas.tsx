@@ -35,9 +35,13 @@ export function ShipPreviewCanvas({ shipId, interactive = false }: ShipPreviewCa
       <directionalLight position={[-5, 5, 25]} intensity={0.6} color="#4a9eff" />
       <directionalLight position={[-15, 10, 0]} intensity={0.4} color="#9966ff" />
 
-      {/* Environment provides reflections for the ships' PBR materials */}
+      {/* Environment provides reflections for the ships' PBR materials.
+          Separate Suspense boundaries: browsing to a not-yet-loaded ship
+          suspends only the model, so the environment doesn't flicker. */}
       <Suspense fallback={null}>
-        <Environment preset="night" />
+        <Environment files={`${import.meta.env.BASE_URL}hdri/night.hdr`} />
+      </Suspense>
+      <Suspense fallback={null}>
         <group rotation={[0, Math.PI / 2, 0]}>
           <ShipModel shipId={shipId} />
         </group>

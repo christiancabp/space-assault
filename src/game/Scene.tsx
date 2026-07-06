@@ -31,7 +31,7 @@ import { ScoreFloaterManager } from '../effects/ScoreFloaterManager';
 function Nebula() {
   // Configure tiling in the onLoad callback (runs post-load, outside render)
   const texture = useTexture(
-    `${import.meta.env.BASE_URL}textures/nebula.png`,
+    `${import.meta.env.BASE_URL}textures/nebula.webp`,
     (t) => {
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
       t.repeat.set(2, 1);
@@ -67,8 +67,10 @@ export function Scene() {
 
   return (
     <>
-      {/* Environment for realistic reflections on ship materials */}
-      <Environment preset="night" />
+      {/* Environment for realistic reflections on ship materials.
+          Same file as drei's "night" preset, self-hosted (no CDN fetch);
+          CC0 via Poly Haven — see public/hdri/ATTRIBUTION.md */}
+      <Environment files={`${import.meta.env.BASE_URL}hdri/night.hdr`} />
 
       {/* Ambient light - soft overall illumination */}
       <ambientLight intensity={0.3} />

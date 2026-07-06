@@ -12,6 +12,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   rocketship: {
     id: 'rocketship',
     displayName: 'Rocketship',
+    modelPath: '/models/rocketship.glb',
     transform: {
       // Scale to match game units
       scale: [0.1, 0.1, 0.1],
@@ -38,6 +39,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'guardians-ship': {
     id: 'guardians-ship',
     displayName: 'Milano',
+    modelPath: '/models/guardians-ship.glb',
     transform: {
       // Scale to match game units (adjust as needed)
       scale: [0.0006, 0.0006, 0.0006],
@@ -69,6 +71,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'planet-express': {
     id: 'planet-express',
     displayName: 'Planet Express',
+    modelPath: '/models/planet-express.glb',
     transform: {
       // positionOffset = -(rotation × scale × model center) — recompute if rotation changes
       scale: [0.07, 0.07, 0.07],
@@ -93,6 +96,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'rick-n-morty': {
     id: 'rick-n-morty',
     displayName: "Rick's Ship",
+    modelPath: '/models/rick-n-morty.glb',
     transform: {
       // Raw model: 219 x 174 x 200, centered, sits 47 units up
       scale: [0.01, 0.01, 0.01],
@@ -122,6 +126,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'sayan-capsule': {
     id: 'sayan-capsule',
     displayName: 'Saiyan Capsule',
+    modelPath: '/models/sayan-capsule.glb',
     transform: {
       // Raw model: 0.72 unit sphere, perfectly centered
       scale: [1, 1, 1],
@@ -146,6 +151,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'space-shuttle': {
     id: 'space-shuttle',
     displayName: 'Space Shuttle',
+    modelPath: '/models/space-shuttle.glb',
     transform: {
       // Raw model: 81 x 30 x 51, slightly off-center
       scale: [0.04, 0.04, 0.04],
@@ -180,6 +186,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   starship: {
     id: 'starship',
     displayName: 'Starship',
+    modelPath: '/models/starship.glb',
     transform: {
       // Raw model: 2000 x 5318 x 1105 — modeled vertically (nose up),
       // rotated -90° on X so the nose points toward enemies (-Z)
@@ -205,6 +212,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'tie-fighter': {
     id: 'tie-fighter',
     displayName: 'TIE Fighter',
+    modelPath: '/models/tie-fighter.glb',
     transform: {
       // Raw model: 5.8 x 6.6 x 5.5, off-center at [2.135, 2.424, -2.022]
       // positionOffset = -(rotation × scale × model center) — recompute if rotation changes
@@ -230,6 +238,7 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   'time-machine': {
     id: 'time-machine',
     displayName: 'Time Machine',
+    modelPath: '/models/time-machine.glb',
     transform: {
       // Raw model: 5.9 x 4.1 x 5.9, sits 2.6 units up
       scale: [0.5, 0.5, 0.5],

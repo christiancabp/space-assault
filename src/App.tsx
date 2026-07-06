@@ -12,6 +12,7 @@
 
 import { useEffect } from 'react';
 import { Game } from './game/Game';
+import { CanvasErrorBoundary } from './ui/CanvasErrorBoundary';
 import { HUD } from './ui/HUD';
 import { LoadingScreen } from './ui/LoadingScreen';
 import { DamageFlash } from './ui/DamageFlash';
@@ -49,8 +50,11 @@ function App() {
 
   return (
     <div className="app">
-      {/* 3D Game Canvas - always rendered */}
-      <Game />
+      {/* 3D Game Canvas - always rendered; boundary catches WebGL
+          failure/context loss so users get a message, not a blank page */}
+      <CanvasErrorBoundary>
+        <Game />
+      </CanvasErrorBoundary>
 
       {/* HTML UI Overlays - conditionally rendered based on phase */}
       {phase === 'menu' && <StartScreen />}

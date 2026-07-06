@@ -9,7 +9,7 @@
  * - Triggers game start via store action
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
@@ -18,6 +18,7 @@ import { useEffectsStore } from '../stores/effectsStore';
 import { getShipConfig } from '../config/shipConfigs';
 import { enterFullscreen } from '../input/touchInput';
 import { AudioSettings } from './AudioSettings';
+import { CreditsScreen } from './CreditsScreen';
 
 export function StartScreen() {
   const startGame = useGameStore((state) => state.startGame);
@@ -28,6 +29,7 @@ export function StartScreen() {
   const resetPlayer = usePlayerStore((state) => state.resetPlayer);
   const selectedShipId = usePlayerStore((state) => state.selectedShipId);
   const selectedShipName = getShipConfig(selectedShipId).displayName;
+  const [showCredits, setShowCredits] = useState(false);
 
   // Handle game start - clear any leftover state and begin
   const handleStart = useCallback(() => {
@@ -44,9 +46,16 @@ export function StartScreen() {
     startGame();
   }, [startGame, clearEnemies, clearBullets, clearEffects, resetPlayer]);
 
-  // Listen for Enter key to start game
+  // Listen for Enter key to start game (ESC closes credits first)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (showCredits) {
+        if (event.code === 'Escape' || event.code === 'Enter') {
+          event.preventDefault();
+          setShowCredits(false);
+        }
+        return;
+      }
       if (event.code === 'Enter') {
         event.preventDefault();
         handleStart();
@@ -55,7 +64,11 @@ export function StartScreen() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleStart]);
+  }, [handleStart, showCredits]);
+
+  if (showCredits) {
+    return <CreditsScreen onClose={() => setShowCredits(false)} />;
+  }
 
   return (
     <div className="menu-overlay start-screen">
@@ -98,6 +111,9 @@ export function StartScreen() {
 
       <p className="start-hint">Press ENTER to start</p>
       <button onClick={handleStart}>START GAME</button>
+      <button className="secondary credits-button" onClick={() => setShowCredits(true)}>
+        CREDITS
+      </button>
     </div>
   );
 }

@@ -12,6 +12,7 @@
  * - Scene setup is separated into Scene component
  */
 
+import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Scene } from './Scene';
 import { CameraRig } from './CameraRig';
@@ -24,6 +25,7 @@ import { EnemyManager } from '../entities/EnemyManager';
 import { BulletManager } from '../entities/BulletManager';
 import { Stars } from '../entities/Stars';
 import { useGameStore } from '../stores/gameStore';
+import { CONTEXT_LOST_EVENT } from '../ui/CanvasErrorBoundary';
 import { GAME_CONFIG } from '../config';
 
 export function Game() {
@@ -46,6 +48,13 @@ export function Game() {
       gl={{ antialias: true }}
       // Cap device pixel ratio: DPR-3 phones would push 3x pixels through bloom
       dpr={[1, 2]}
+      // Surface runtime context loss to CanvasErrorBoundary (GPU reset etc.)
+      onCreated={({ gl }) => {
+        gl.domElement.addEventListener('webglcontextlost', (e) => {
+          e.preventDefault();
+          window.dispatchEvent(new Event(CONTEXT_LOST_EVENT));
+        });
+      }}
     >
       {/* Scene setup - always rendered */}
       <Scene />
@@ -59,12 +68,17 @@ export function Game() {
       {/* Star field - always rendered for background motion */}
       <Stars />
 
-      {/* Selected ship idling behind the main menu */}
-      {phase === 'menu' && <MenuShip />}
+      {/* Selected ship idling behind the main menu. Suspense so an uncached
+          ship GLB (ships now stream on demand) can't suspend the whole Canvas */}
+      {phase === 'menu' && (
+        <Suspense fallback={null}>
+          <MenuShip />
+        </Suspense>
+      )}
 
       {/* Game entities - only during gameplay */}
       {isPlaying && (
-        <>
+        <Suspense fallback={null}>
           {/* Central game loop for systems (collision, spawning) */}
           <GameLoop />
 
@@ -76,7 +90,7 @@ export function Game() {
 
           {/* Bullet manager renders all active bullets */}
           <BulletManager />
-        </>
+        </Suspense>
       )}
 
       {/* Post-processing (bloom) - keep last */}

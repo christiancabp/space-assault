@@ -129,6 +129,74 @@ html, body, #root {
   box-shadow: 0 0 20px rgba(74, 158, 255, 0.5);
 }
 
+/* Canvas failure fallback - must cover every other overlay (loading screen
+   is z-index 100) so its RELOAD button stays clickable */
+.canvas-error-overlay {
+  z-index: 200;
+  background: #000008;
+}
+
+/* ── Credits screen ── */
+.credits-screen h1 {
+  margin-bottom: 1rem;
+}
+
+.credits-panel {
+  max-width: 620px;
+  width: min(90vw, 620px);
+  text-align: left;
+  background: rgba(10, 16, 48, 0.35);
+  border: 1px solid rgba(74, 158, 255, 0.25);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+}
+
+.credits-section + .credits-section {
+  margin-top: 1.5rem;
+}
+
+.credits-section h2 {
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+  margin-bottom: 0.75rem;
+}
+
+.credits-license {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+}
+
+.credits-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  align-items: baseline;
+  padding: 0.3rem 0;
+}
+
+.credits-row a {
+  color: var(--color-text);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(74, 158, 255, 0.4);
+}
+
+.credits-row a:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.credits-author {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.credits-button {
+  margin-top: 1rem;
+}
+
 /* ── Touch controls (coarse-pointer devices, gameplay only) ── */
 .touch-controls {
   position: absolute;

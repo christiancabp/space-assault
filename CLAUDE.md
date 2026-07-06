@@ -46,39 +46,36 @@ src/
 ├── hooks/                  # useKeyboard
 ├── input/                  # touchInput.ts - shared mutable touch state + fullscreen helper
 ├── invaders/               # InvaderModel (config-driven, drei <Clone>)
-├── ships/                  # Ship components (gltfjsx-generated)
+├── ships/                  # ShipModel (config-driven, drei <Clone>, boot-preloads selected ship)
 ├── shipSelector/           # Ship carousel + preview canvas
 ├── stores/                 # Zustand: game, player, enemy, bullet, effects (explosions/floaters/
 │                           # trauma), settings (persisted audio prefs), playArea (live bounds)
 ├── systems/                # collisionSystem (also triggers explosion/shake/SFX feedback)
 ├── types/                  # game.types.ts, ship.types.ts
-└── ui/                     # HUD, menus, LoadingScreen, DamageFlash, TouchControls, AudioSettings
+└── ui/                     # HUD, menus, LoadingScreen, DamageFlash, TouchControls,
+                            # AudioSettings, CreditsScreen, CanvasErrorBoundary
 
 public/
-├── models/                 # Ship GLBs (+ models/invaders/ for enemies)
+├── models/                 # Ship GLBs, compressed (+ models/invaders/; see ATTRIBUTION.md)
 ├── sounds/                 # CC0 SFX + music (see ATTRIBUTION.md)
-└── textures/               # CC0 nebula backdrop (see ATTRIBUTION.md)
+├── textures/               # CC0 nebula backdrop (see ATTRIBUTION.md)
+├── hdri/                   # night.hdr - self-hosted drei "night" preset (CC0)
+├── icon.svg + *.png        # Favicon / PWA / apple-touch icons
+└── manifest.webmanifest    # PWA manifest (standalone, portrait)
 ```
 
 ### 3D Models
 
-GLB model files are in `public/models/` and loaded at runtime. Ship components in `src/ships/` are generated via `gltfjsx`.
+GLB model files are in `public/models/` and loaded at runtime. Both ships and invaders are rendered config-driven via drei `<Clone object={scene}>`: `src/ships/ShipModel.tsx` reads `shipConfigs.ts` (`modelPath`, transform, hitbox, engine mounts), `src/invaders/InvaderModel.tsx` reads `enemyConfigs.ts`. There are NO per-ship gltfjsx components anymore — `<Clone>` renders the file's own node hierarchy, which survives GLB recompression (gltfjsx-baked JSX does not: quantization rewrites node transforms and the baked transforms go stale).
 
-| Model File | Component | Status | Description |
-|------------|-----------|--------|-------------|
-| rocketship.glb | `Rocketship.tsx` | Active | Spaceship |
-| guardians-ship.glb | `GuardiansShip.tsx` | Active | Milano from Guardians of the Galaxy |
-| planet-express.glb | `PlanetExpress.tsx` | Active | Planet Express SpaceShip |
-| rick-n-morty.glb | `RickNMorty.tsx` | Active | Rick's ship from Rick and Morty |
-| sayan-capsule.glb | `SayanCapsule.tsx` | Active | Vegeta SpaceShip |
-| space-shuttle.glb | `SpaceShuttle.tsx` | Active | Space Shuttle |
-| starship.glb | `Starship.tsx` | Active | SpaceX Starship |
-| tie-fighter.glb | `TieFighter.tsx` | Active | T.I.E Fighter |
-| time-machine.glb | `TimeMachine.tsx` | Active | Dragon Ball Time Machine |
+The 9 ship GLBs (rocketship, guardians-ship, planet-express, rick-n-morty, sayan-capsule, space-shuttle, starship, tie-fighter, time-machine) are compressed with `@gltf-transform/cli optimize --compress meshopt --texture-compress webp --texture-size 1024 --simplify false` (65 MB → 5.6 MB). drei's `useGLTF` wires the meshopt decoder by default — no app code needed. Two caveats learned the hard way:
 
-Enemy models live in `public/models/invaders/` (invader_1/3/5, boss_invader — classic Space Invaders sprites) and are rendered by the config-driven `src/invaders/InvaderModel.tsx` via drei `<Clone>`; per-type transforms/hitboxes/explosion tints are in `src/config/enemyConfigs.ts`.
+- Config transforms in `shipConfigs.ts` are tuned against the *rendered* pose. tie-fighter and rocketship originals had root matrices that the old hand-tuned components ignored; their roots were normalized (scale-only / identity) before compression so `<Clone>` matches the tuned configs. If you re-derive from the original Sketchfab downloads, re-apply that normalization (see git history of `public/models/`).
+- Only the persisted selected ship is preloaded at boot (`ShipModel.tsx` module scope); the rest stream on demand behind the ship-selector's Suspense. Keep it that way — preloading all ships was the 65 MB first-load bug.
 
-All models are CC-BY-4.0 licensed. `scripts/measure-glb.mjs [dir]` prints each model's bounding box and center (useful for setting `shipConfigs.ts`/`enemyConfigs.ts` scale/offset values; defaults to `public/models/`).
+Enemy models live in `public/models/invaders/` (invader_1/3/5, boss_invader — classic Space Invaders sprites, 64 KB total, left uncompressed); per-type transforms/hitboxes/explosion tints are in `src/config/enemyConfigs.ts`.
+
+All models are CC-BY-4.0 (see `public/models/ATTRIBUTION.md` and the in-game CREDITS screen — update both when models change). `scripts/measure-glb.mjs [dir]` prints bounding boxes/centers for tuning configs (raw accessor min/max — NOT meaningful on quantized GLBs; use `npx @gltf-transform/cli inspect` for those). `scripts/check-glb-names.mjs [dir|file]` dumps node/material name sets.
 
 ### Key Patterns
 
@@ -140,4 +137,8 @@ Play bounds are NOT fixed: `PlayAreaManager` intersects the designed `PLAYER_BOU
 
 ## Asset Sourcing
 
-CC0 audio/textures came from OpenGameArt (direct file URLs work with curl; kenney.nl's downloads are JS-gated). Keep attribution files in `public/sounds/` and `public/textures/` updated when adding assets. When adding GLBs, don't assume gltfjsx node structure is uniform across files - `InvaderModel` uses drei `<Clone object={scene}>` for that reason.
+CC0 audio/textures came from OpenGameArt (direct file URLs work with curl; kenney.nl's downloads are JS-gated). Keep the attribution files in `public/models/`, `public/sounds/`, `public/textures/`, `public/hdri/` AND the in-game CREDITS screen (`src/ui/CreditsScreen.tsx`) updated when adding assets. Don't assume GLB node structure is uniform across files — both `ShipModel` and `InvaderModel` use drei `<Clone object={scene}>` for that reason.
+
+## Deployment (Vercel)
+
+Live at <https://space-assault.vercel.app/>; push-to-main deploys prod. `vercel.json` sets `Cache-Control: immutable, max-age=1y` on `/models`, `/sounds`, `/textures`, `/hdri`. These paths are NOT content-hashed — when replacing an asset, RENAME the file (e.g. `nebula2.webp`), or returning visitors keep the stale cached copy for a year. Vite-hashed JS/CSS and index.html use Vercel defaults and are safe.

@@ -1,0 +1,28 @@
+{
+  "name": "Space Assault",
+  "short_name": "Space Assault",
+  "description": "A Galaga-style 3D space shooter in your browser. Pick a ship, dodge with barrel rolls, and blast the invaders.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000008",
+  "theme_color": "#000008",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
