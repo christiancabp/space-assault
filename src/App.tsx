@@ -18,12 +18,18 @@ import { GameOverScreen } from './ui/GameOverScreen';
 import { PauseScreen } from './ui/PauseScreen';
 import { ShipSelector } from './shipSelector/ShipSelector';
 import { useGameStore } from './stores/gameStore';
+import { initAudio } from './audio/soundManager';
 import './index.css';
 
 function App() {
   // Subscribe to game phase for conditional UI rendering
   const phase = useGameStore((state) => state.phase);
   const pauseGame = useGameStore((state) => state.pauseGame);
+
+  // Initialize audio system once (idempotent; resumes on first game start)
+  useEffect(() => {
+    initAudio();
+  }, []);
 
   // Listen for Enter key to pause during gameplay
   useEffect(() => {

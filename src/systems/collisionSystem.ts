@@ -14,6 +14,8 @@ import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useGameStore } from '../stores/gameStore';
+import { useEffectsStore } from '../stores/effectsStore';
+import { playSfx } from '../audio/soundManager';
 import { GAME_CONFIG } from '../config';
 import { getShipConfig } from '../config';
 
@@ -58,6 +60,8 @@ export function checkCollisions(): void {
   const addScore = useGameStore.getState().addScore;
   const loseLife = useGameStore.getState().loseLife;
   const setInvulnerable = usePlayerStore.getState().setInvulnerable;
+  const spawnExplosion = useEffectsStore.getState().spawnExplosion;
+  const addTrauma = useEffectsStore.getState().addTrauma;
 
   // Define hitbox sizes
   const { BULLET_SIZE, ENEMY_SIZE } = GAME_CONFIG;
@@ -111,6 +115,11 @@ export function checkCollisions(): void {
         // Add score
         addScore(GAME_CONFIG.POINTS_PER_ENEMY);
 
+        // Feedback: particle burst, small screen kick, explosion sound
+        spawnExplosion(enemy.position, GAME_CONFIG.COLORS.enemy);
+        addTrauma(GAME_CONFIG.SCREEN_SHAKE.traumaPerKill);
+        playSfx('explosion');
+
         // Bullet can only hit one enemy
         break;
       }
@@ -136,6 +145,11 @@ export function checkCollisions(): void {
         // Collision with player!
         enemiesToRemove.add(enemy.id);
         loseLife();
+
+        // Feedback: burst at the impact, heavy shake, hit sound
+        spawnExplosion(enemy.position, GAME_CONFIG.COLORS.bullet);
+        addTrauma(GAME_CONFIG.SCREEN_SHAKE.traumaPerHit);
+        playSfx('playerHit');
 
         // Brief invulnerability
         setInvulnerable(true);

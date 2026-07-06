@@ -22,6 +22,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
 import { GAME_CONFIG } from '../config';
 import { ShipModel } from '../ships';
+import { playSfx } from '../audio/soundManager';
 
 export function Player() {
   // Ref to the group for direct position updates
@@ -186,6 +187,7 @@ export function Player() {
           z: GAME_CONFIG.PLAYER_Z,
         });
         addBullet(bullet);
+        playSfx('laser');
         lastShotTime.current = now;
       }
     }

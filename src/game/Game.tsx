@@ -14,6 +14,8 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Scene } from './Scene';
+import { CameraRig } from './CameraRig';
+import { PostFX } from './PostFX';
 import { GameLoop } from './GameLoop';
 import { Player } from '../entities/Player';
 import { EnemyManager } from '../entities/EnemyManager';
@@ -44,6 +46,9 @@ export function Game() {
       {/* Scene setup - always rendered */}
       <Scene />
 
+      {/* Screen shake rig - applies trauma-based camera shake */}
+      <CameraRig />
+
       {/* Star field - always rendered for background motion */}
       <Stars />
 
@@ -63,6 +68,9 @@ export function Game() {
           <BulletManager />
         </>
       )}
+
+      {/* Post-processing (bloom) - keep last */}
+      <PostFX />
     </Canvas>
   );
 }

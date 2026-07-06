@@ -14,6 +14,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
+import { useEffectsStore } from '../stores/effectsStore';
 
 export function GameOverScreen() {
   const score = useGameStore((state) => state.score);
@@ -21,6 +22,7 @@ export function GameOverScreen() {
   const resetGame = useGameStore((state) => state.resetGame);
   const clearEnemies = useEnemyStore((state) => state.clearEnemies);
   const clearBullets = useBulletStore((state) => state.clearBullets);
+  const clearEffects = useEffectsStore((state) => state.clearEffects);
   const resetPlayer = usePlayerStore((state) => state.resetPlayer);
 
   // Format score with leading zeros
@@ -30,9 +32,10 @@ export function GameOverScreen() {
   const handlePlayAgain = useCallback(() => {
     clearEnemies();
     clearBullets();
+    clearEffects();
     resetPlayer();
     startGame();
-  }, [startGame, clearEnemies, clearBullets, resetPlayer]);
+  }, [startGame, clearEnemies, clearBullets, clearEffects, resetPlayer]);
 
   // Listen for Enter key to play again
   useEffect(() => {
@@ -51,9 +54,10 @@ export function GameOverScreen() {
   const handleMenu = useCallback(() => {
     clearEnemies();
     clearBullets();
+    clearEffects();
     resetPlayer();
     resetGame();
-  }, [resetGame, clearEnemies, clearBullets, resetPlayer]);
+  }, [resetGame, clearEnemies, clearBullets, clearEffects, resetPlayer]);
 
   return (
     <div className="menu-overlay game-over">

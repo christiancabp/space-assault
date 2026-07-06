@@ -9,14 +9,49 @@
  * - Separated from Game.tsx for cleaner organization
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, Suspense } from 'react';
 import { useThree } from '@react-three/fiber';
-import { 
-  Environment, 
-  // OrbitControls 
+import {
+  Environment,
+  useTexture,
+  // OrbitControls
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { GAME_CONFIG } from '../config';
+import { ExplosionManager } from '../effects/ExplosionManager';
+
+/**
+ * Nebula - Distant space backdrop
+ *
+ * A large plane past the fog distance (fog disabled on its material so it
+ * stays visible), tinted dark so gameplay elements keep contrast.
+ * Texture: CC0 seamless nebula (see public/textures/ATTRIBUTION.md).
+ */
+function Nebula() {
+  // Configure tiling in the onLoad callback (runs post-load, outside render)
+  const texture = useTexture(
+    `${import.meta.env.BASE_URL}textures/nebula.png`,
+    (t) => {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(2, 1);
+      t.colorSpace = THREE.SRGBColorSpace;
+    }
+  );
+
+  return (
+    // Oversized and shifted down so the plane edge stays outside the
+    // downward-pitched camera frustum at any window aspect ratio
+    <mesh position={[0, -20, -100]} renderOrder={-1}>
+      <planeGeometry args={[420, 260]} />
+      <meshBasicMaterial
+        map={texture}
+        color="#9a9db8"
+        fog={false}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
 
 export function Scene() {
   const { camera } = useThree();
@@ -67,11 +102,19 @@ export function Scene() {
         decay={2}
       />
 
-      {/* Background color - deep space black */}
+      {/* Background color - deep space black (fallback while nebula loads) */}
       <color attach="background" args={['#000008']} />
+
+      {/* Nebula backdrop behind all gameplay */}
+      <Suspense fallback={null}>
+        <Nebula />
+      </Suspense>
 
       {/* Fog for depth - objects fade into darkness at distance */}
       <fog attach="fog" args={['#000008', 30, 80]} />
+
+      {/* Explosion particle bursts */}
+      <ExplosionManager />
       
       {/* OrbitControls for development - can be removed in production */}
       {/* <OrbitControls /> */}

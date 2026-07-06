@@ -74,32 +74,36 @@
 
 ### Step 12: Polish & Testing
 
-- [ ] Tune gameConfig values (speeds, spawn rate, bounds)
-- [ ] Test full game loop (start → play → die → game over → restart)
+- [x] Tune gameConfig values (speeds, spawn rate, bounds)
+- [x] Test full game loop (start → play → die → game over → restart)
 
 ---
 
 ## Phase 2: Visual Polish (Future)
 
-- [ ] 3D ship models (GLTF)
-- [ ] Custom shaders (explosions, propulsion effects)
-- [ ] Particle effects for hits/explosions
+- [x] 3D ship models (GLTF)
+- [ ] Mobile/touch controls
+- [x] Upgrade star field to a more realistic one (round twinkling sprites, 2 parallax layers)
+- [x] Custom shaders (explosions, propulsion effects)
+- [x] Particle effects for hits/explosions
 - [ ] Loading screen
 - [ ] Game lobby/menu design
-- [ ] Sound effects
-- [ ] Background music
-- [ ] Screen shake on hits
+- [x] Sound effects (CC0, see public/sounds/ATTRIBUTION.md)
+- [x] Background music
+- [x] Screen shake on hits (trauma system wired; shake curve TODO in src/game/CameraRig.tsx)
+- [x] Better background (CC0 nebula backdrop + bloom post-processing)
+- [ ] Better UI/UX design
+- [ ] Enemy 3d models (GLTF)
 
 ## Phase 3: Gameplay Depth (Future)
 
 - [ ] Enemy shooting mechanics
-- [ ] Wave-based spawning
-- [ ] Enemy formations and patterns
 - [ ] Power-ups (spread shot, shields)
-- [ ] Level progression
+- [ ] Wave-based spawning 
+- [ ] Enemy formations and patterns
+- [ ] Level progression (enemies come in waves starting at level 1 with few enemies more enemies added each level)
 - [ ] Difficulty scaling
 - [ ] High score system (localStorage)
-- [ ] Mobile/touch controls
 
 ---
 

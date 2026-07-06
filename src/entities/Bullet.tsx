@@ -77,7 +77,8 @@ export function Bullet({ bullet }: BulletProps) {
       <meshStandardMaterial
         color={COLORS.bullet}
         emissive={COLORS.bulletEmissive}
-        emissiveIntensity={0.8}
+        emissiveIntensity={2.5}
+        toneMapped={false}
       />
     </mesh>
   );

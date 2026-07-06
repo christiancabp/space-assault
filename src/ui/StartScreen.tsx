@@ -14,6 +14,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
+import { useEffectsStore } from '../stores/effectsStore';
 import { getShipConfig } from '../config/shipConfigs';
 import { ShipPreviewCanvas } from '../shipSelector/ShipPreviewCanvas';
 
@@ -22,6 +23,7 @@ export function StartScreen() {
   const openShipSelect = useGameStore((state) => state.openShipSelect);
   const clearEnemies = useEnemyStore((state) => state.clearEnemies);
   const clearBullets = useBulletStore((state) => state.clearBullets);
+  const clearEffects = useEffectsStore((state) => state.clearEffects);
   const resetPlayer = usePlayerStore((state) => state.resetPlayer);
   const selectedShipId = usePlayerStore((state) => state.selectedShipId);
   const selectedShipName = getShipConfig(selectedShipId).displayName;
@@ -31,11 +33,12 @@ export function StartScreen() {
     // Clear any entities from previous game
     clearEnemies();
     clearBullets();
+    clearEffects();
     resetPlayer();
 
     // Start the game
     startGame();
-  }, [startGame, clearEnemies, clearBullets, resetPlayer]);
+  }, [startGame, clearEnemies, clearBullets, clearEffects, resetPlayer]);
 
   // Listen for Enter key to start game
   useEffect(() => {

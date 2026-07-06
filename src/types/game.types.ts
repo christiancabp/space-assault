@@ -47,3 +47,10 @@ export interface PlayerState {
   position: Vector3;
   isInvulnerable: boolean; // Brief invulnerability after getting hit
 }
+
+// Explosion effect - spawned at a destruction point, removed after its lifetime
+export interface Explosion {
+  id: string;
+  position: Vector3;
+  color: string; // Outer particle color (usually the destroyed entity's color)
+}

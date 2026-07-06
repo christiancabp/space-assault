@@ -99,11 +99,62 @@ export const GAME_CONFIG = {
   // STAR FIELD
   // ============================================
   STARS: {
-    count: 900,
-    speed: 25,                         // How fast stars stream past
     spread: { x: 80, y: 40, z: 100 },  // Star field dimensions
     resetZ: -100,                      // Where stars reset when passing camera
     despawnZ: 30,                      // When to reset stars
+    twinkleSpeed: 3.5,                 // Per-star brightness oscillation rate
+    // Parallax layers: far/slow/small behind near/fast/large
+    layers: [
+      { count: 650, speed: 16, sizeMin: 0.4, sizeMax: 1.0, brightness: 0.55 },
+      { count: 300, speed: 32, sizeMin: 0.9, sizeMax: 2.2, brightness: 1.0 },
+    ],
+  },
+
+  // ============================================
+  // EXPLOSIONS
+  // ============================================
+  EXPLOSIONS: {
+    particleCount: 60,                 // Particles per burst (pool size)
+    lifetime: 0.7,                     // Seconds until burst is removed
+    speedMin: 4,                       // Particle radial speed range
+    speedMax: 14,
+    sizeMin: 6,                        // Point size range (screen-space px at ref depth)
+    sizeMax: 16,
+    coreColor: '#fff3c0',              // Hot center flash
+    drag: 2.5,                         // Velocity damping over life
+  },
+
+  // ============================================
+  // SCREEN SHAKE (trauma-based: shake = trauma²)
+  // ============================================
+  SCREEN_SHAKE: {
+    maxOffset: 0.45,                   // Max positional shake (units) at trauma=1
+    maxRoll: 0.06,                     // Max camera roll (radians) at trauma=1
+    frequency: 22,                     // Shake oscillation speed
+    decayPerSecond: 1.4,               // Trauma lost per second
+    traumaPerKill: 0.22,               // Added when a bullet destroys an enemy
+    traumaPerHit: 0.6,                 // Added when the player is hit
+  },
+
+  // ============================================
+  // AUDIO
+  // ============================================
+  AUDIO: {
+    masterVolume: 0.8,
+    sfxVolume: 0.9,
+    musicVolume: 0.45,
+    pauseDuck: 0.3,                    // Music volume multiplier while paused
+    pitchVariance: 0.12,               // ± random playback-rate variation on SFX
+  },
+
+  // ============================================
+  // BLOOM POST-PROCESSING
+  // ============================================
+  BLOOM: {
+    intensity: 1.1,
+    luminanceThreshold: 0.3,           // Only colors brighter than this glow
+    luminanceSmoothing: 0.25,
+    mipmapBlur: true,
   },
 } as const;
 
