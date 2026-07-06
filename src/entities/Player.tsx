@@ -46,6 +46,7 @@ export function Player() {
 
   // Store state and actions
   const setPosition = usePlayerStore((state) => state.setPosition);
+  const isInvulnerable = usePlayerStore((state) => state.isInvulnerable);
   const setBarrelRolling = usePlayerStore((state) => state.setBarrelRolling);
   const selectedShipId = usePlayerStore((state) => state.selectedShipId);
   const addBullet = useBulletStore((state) => state.addBullet);
@@ -54,6 +55,15 @@ export function Player() {
   // Game loop - runs every frame
   useFrame((state, delta) => {
     if (!groupRef.current) return;
+
+    // Classic arcade invulnerability strobe after taking a hit
+    if (isInvulnerable) {
+      const { invulnBlinkHz } = GAME_CONFIG.UI;
+      groupRef.current.visible =
+        Math.floor(state.clock.elapsedTime * invulnBlinkHz * 2) % 2 === 0;
+    } else if (!groupRef.current.visible) {
+      groupRef.current.visible = true;
+    }
 
     // Don't update when paused or not playing
     if (phase !== 'playing') return;

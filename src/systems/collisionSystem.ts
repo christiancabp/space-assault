@@ -18,6 +18,7 @@ import { useEffectsStore } from '../stores/effectsStore';
 import { playSfx } from '../audio/soundManager';
 import { GAME_CONFIG } from '../config';
 import { getShipConfig } from '../config';
+import { getInvaderConfig } from '../config/enemyConfigs';
 
 // Hitbox definition for collision checks
 interface Hitbox {
@@ -61,10 +62,11 @@ export function checkCollisions(): void {
   const loseLife = useGameStore.getState().loseLife;
   const setInvulnerable = usePlayerStore.getState().setInvulnerable;
   const spawnExplosion = useEffectsStore.getState().spawnExplosion;
+  const spawnFloater = useEffectsStore.getState().spawnFloater;
   const addTrauma = useEffectsStore.getState().addTrauma;
 
   // Define hitbox sizes
-  const { BULLET_SIZE, ENEMY_SIZE } = GAME_CONFIG;
+  const { BULLET_SIZE } = GAME_CONFIG;
 
   // Player hitbox from ship config
   const playerHitbox: Hitbox = {
@@ -98,13 +100,14 @@ export function checkCollisions(): void {
       // Skip if already marked for removal
       if (enemiesToRemove.has(enemy.id)) continue;
 
+      const invaderHitbox = getInvaderConfig(enemy.invaderType).hitbox;
       const enemyHitbox: Hitbox = {
         x: enemy.position.x,
         y: enemy.position.y,
         z: enemy.position.z,
-        width: ENEMY_SIZE.x,
-        height: ENEMY_SIZE.y,
-        depth: ENEMY_SIZE.z,
+        width: invaderHitbox.width,
+        height: invaderHitbox.height,
+        depth: invaderHitbox.depth,
       };
 
       if (boxesIntersect(bulletHitbox, enemyHitbox)) {
@@ -115,8 +118,10 @@ export function checkCollisions(): void {
         // Add score
         addScore(GAME_CONFIG.POINTS_PER_ENEMY);
 
-        // Feedback: particle burst, small screen kick, explosion sound
-        spawnExplosion(enemy.position, GAME_CONFIG.COLORS.enemy);
+        // Feedback: particle burst in the invader's color, "+100" floater,
+        // small screen kick, explosion sound
+        spawnExplosion(enemy.position, getInvaderConfig(enemy.invaderType).explosionColor);
+        spawnFloater(enemy.position, `+${GAME_CONFIG.POINTS_PER_ENEMY}`);
         addTrauma(GAME_CONFIG.SCREEN_SHAKE.traumaPerKill);
         playSfx('explosion');
 
@@ -132,13 +137,14 @@ export function checkCollisions(): void {
       // Skip if already marked for removal
       if (enemiesToRemove.has(enemy.id)) continue;
 
+      const invaderHitbox = getInvaderConfig(enemy.invaderType).hitbox;
       const enemyHitbox: Hitbox = {
         x: enemy.position.x,
         y: enemy.position.y,
         z: enemy.position.z,
-        width: ENEMY_SIZE.x,
-        height: ENEMY_SIZE.y,
-        depth: ENEMY_SIZE.z,
+        width: invaderHitbox.width,
+        height: invaderHitbox.height,
+        depth: invaderHitbox.depth,
       };
 
       if (boxesIntersect(playerHitbox, enemyHitbox)) {

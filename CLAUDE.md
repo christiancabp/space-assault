@@ -68,7 +68,9 @@ GLB model files are in `public/models/` and loaded at runtime. Ship components i
 | tie-fighter.glb | `TieFighter.tsx` | Active | T.I.E Fighter |
 | time-machine.glb | `TimeMachine.tsx` | Active | Dragon Ball Time Machine |
 
-All models are CC-BY-4.0 licensed. `scripts/measure-glb.mjs` prints each model's bounding box and center (useful for setting `shipConfigs.ts` scale/offset values).
+Enemy models live in `public/models/invaders/` (invader_1/3/5, boss_invader — classic Space Invaders sprites) and are rendered by the config-driven `src/invaders/InvaderModel.tsx` via drei `<Clone>`; per-type transforms/hitboxes/explosion tints are in `src/config/enemyConfigs.ts`.
+
+All models are CC-BY-4.0 licensed. `scripts/measure-glb.mjs [dir]` prints each model's bounding box and center (useful for setting `shipConfigs.ts`/`enemyConfigs.ts` scale/offset values; defaults to `public/models/`).
 
 ### Key Patterns
 

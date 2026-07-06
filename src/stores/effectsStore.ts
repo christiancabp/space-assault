@@ -12,25 +12,30 @@
  */
 
 import { create } from 'zustand';
-import type { Explosion, Vector3 } from '../types/game.types';
+import type { Explosion, ScoreFloater, Vector3 } from '../types/game.types';
 
 interface EffectsState {
   explosions: Explosion[];
+  floaters: ScoreFloater[];
   trauma: number;
 
   // Actions
   spawnExplosion: (position: Vector3, color: string) => void;
   removeExplosion: (id: string) => void;
+  spawnFloater: (position: Vector3, text: string) => void;
+  removeFloater: (id: string) => void;
   addTrauma: (amount: number) => void;
   decayTrauma: (amount: number) => void;
   clearEffects: () => void;
 }
 
-// Module-level counter for unique explosion IDs
+// Module-level counter for unique effect IDs
 let explosionCounter = 0;
+let floaterCounter = 0;
 
 export const useEffectsStore = create<EffectsState>((set) => ({
   explosions: [],
+  floaters: [],
   trauma: 0,
 
   // Spawn an explosion burst at a destruction point
@@ -52,6 +57,25 @@ export const useEffectsStore = create<EffectsState>((set) => ({
     }));
   },
 
+  // Spawn a "+100" style floater at a kill position
+  spawnFloater: (position, text) => {
+    const floater: ScoreFloater = {
+      id: `floater-${floaterCounter++}`,
+      position: { ...position },
+      text,
+    };
+    set((state) => ({
+      floaters: [...state.floaters, floater],
+    }));
+  },
+
+  // Remove floater by ID (called by ScoreFloater when its lifetime ends)
+  removeFloater: (id) => {
+    set((state) => ({
+      floaters: state.floaters.filter((f) => f.id !== id),
+    }));
+  },
+
   // Add screen-shake trauma, clamped to 1 (CameraRig consumes this)
   addTrauma: (amount) => {
     set((state) => ({
@@ -68,6 +92,6 @@ export const useEffectsStore = create<EffectsState>((set) => ({
 
   // Clear all effects (on game reset)
   clearEffects: () => {
-    set({ explosions: [], trauma: 0 });
+    set({ explosions: [], floaters: [], trauma: 0 });
   },
 }));

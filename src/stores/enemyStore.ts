@@ -14,6 +14,7 @@
 import { create } from 'zustand';
 import type { Enemy, Vector3, EnemyPhase } from '../types/game.types';
 import { GAME_CONFIG } from '../config';
+import { REGULAR_INVADERS, type InvaderType } from '../config/enemyConfigs';
 
 interface EnemyState {
   enemies: Enemy[];
@@ -68,6 +69,24 @@ export const useEnemyStore = create<EnemyState>((set) => ({
 }));
 
 /**
+ * TODO(chrisb): pick which invader model each spawn uses — this shapes the
+ * game's variety and difficulty flavor. The fallback below is uniform random
+ * among the three regular invaders; some directions to consider:
+ *
+ * - Weighted: small invaders common, big ones rare
+ *   (e.g. invader5 50%, invader1 30%, invader3 20%)
+ * - Escalation: read useGameStore.getState().score and shift the mix
+ *   toward tougher-looking invaders as the score climbs
+ * - Boss cameo: every Nth spawn returns 'boss' (it's bigger — 3-unit-wide
+ *   hitbox — so it reads as a mini-event). REGULAR_INVADERS excludes it.
+ *
+ * There's no wrong answer; it's game-design taste. ~5-8 lines.
+ */
+function pickInvaderType(): InvaderType {
+  return REGULAR_INVADERS[Math.floor(Math.random() * REGULAR_INVADERS.length)];
+}
+
+/**
  * Helper function to create a new enemy entity
  * Called by EnemyManager when spawning
  */
@@ -98,5 +117,6 @@ export function createEnemy(id: string): Enemy {
     },
     health: 1,
     phase: 'approaching' as EnemyPhase,
+    invaderType: pickInvaderType(),
   };
 }

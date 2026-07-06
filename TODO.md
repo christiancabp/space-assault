@@ -86,14 +86,14 @@
 - [x] Upgrade star field to a more realistic one (round twinkling sprites, 2 parallax layers)
 - [x] Custom shaders (explosions, propulsion effects)
 - [x] Particle effects for hits/explosions
-- [ ] Loading screen
-- [ ] Game lobby/menu design
+- [x] Loading screen (asset progress bar with fade-out)
+- [x] Game lobby/menu design (cinematic menu: live ship idle + camera drift)
 - [x] Sound effects (CC0, see public/sounds/ATTRIBUTION.md)
 - [x] Background music
 - [x] Screen shake on hits (trauma system wired; shake curve TODO in src/game/CameraRig.tsx)
 - [x] Better background (CC0 nebula backdrop + bloom post-processing)
-- [ ] Better UI/UX design
-- [ ] Enemy 3d models (GLTF)
+- [x] Better UI/UX design (invuln blink, damage flash, low-lives vignette, score pop + floaters)
+- [x] Enemy 3d models (GLTF) (Space Invaders models; spawn mix TODO in src/stores/enemyStore.ts)
 
 ## Phase 3: Gameplay Depth (Future)
 

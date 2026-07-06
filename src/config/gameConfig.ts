@@ -148,6 +148,25 @@ export const GAME_CONFIG = {
   },
 
   // ============================================
+  // UI / FEEDBACK
+  // ============================================
+  UI: {
+    invulnBlinkHz: 8,                  // Ship visibility strobe rate while invulnerable
+    damageFlashMs: 350,                // Red flash duration on life lost
+    floaterLifetimeMs: 900,            // "+100" floater lifetime
+    floaterRise: 2.2,                  // World units the floater drifts up
+
+    // Cinematic menu camera (drifts here while on the menu)
+    MENU_CAMERA: {
+      position: { x: 0, y: 3.2, z: 11 },
+      lookAt: { x: 0, y: 1.8, z: -12 },
+      driftX: 1.4,                     // Lissajous drift amplitude
+      driftY: 0.6,
+      blendSpeed: 1.6,                 // Menu<->gameplay pose ease rate
+    },
+  },
+
+  // ============================================
   // BLOOM POST-PROCESSING
   // ============================================
   BLOOM: {

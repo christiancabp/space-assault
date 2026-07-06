@@ -19,6 +19,7 @@ import {
 import * as THREE from 'three';
 import { GAME_CONFIG } from '../config';
 import { ExplosionManager } from '../effects/ExplosionManager';
+import { ScoreFloaterManager } from '../effects/ScoreFloaterManager';
 
 /**
  * Nebula - Distant space backdrop
@@ -115,6 +116,9 @@ export function Scene() {
 
       {/* Explosion particle bursts */}
       <ExplosionManager />
+
+      {/* "+100" score floaters at kill positions */}
+      <ScoreFloaterManager />
       
       {/* OrbitControls for development - can be removed in production */}
       {/* <OrbitControls /> */}

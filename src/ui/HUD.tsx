@@ -2,7 +2,9 @@
  * HUD - Heads-Up Display
  *
  * Shows score and lives during gameplay.
- * Minimal, elegant design matching sci-fi aesthetic.
+ * - Score value pops (scale + glow) each time it changes: re-keying the
+ *   span by score restarts its CSS animation
+ * - Lives readout pulses red on the last life
  *
  * PATTERN: HTML overlay over Canvas
  * - Uses CSS positioning (defined in index.css)
@@ -24,8 +26,15 @@ export function HUD() {
 
   return (
     <div className="hud">
-      <div className="score">SCORE: {formattedScore}</div>
-      <div className="lives">LIVES: {livesDisplay}</div>
+      <div className="score">
+        SCORE:{' '}
+        <span key={score} className="score-value">
+          {formattedScore}
+        </span>
+      </div>
+      <div className={`lives${lives === 1 ? ' danger' : ''}`}>
+        LIVES: {livesDisplay}
+      </div>
     </div>
   );
 }

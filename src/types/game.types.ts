@@ -27,6 +27,7 @@ export type EnemyPhase = 'approaching' | 'attacking' | 'retreating';
 export interface Enemy extends Entity {
   health: number;
   phase: EnemyPhase;
+  invaderType: import('../config/enemyConfigs').InvaderType;
 }
 
 // Bullet entity - tracks who fired it for collision logic
@@ -53,4 +54,11 @@ export interface Explosion {
   id: string;
   position: Vector3;
   color: string; // Outer particle color (usually the destroyed entity's color)
+}
+
+// Score floater - "+100" text that drifts up from a kill position
+export interface ScoreFloater {
+  id: string;
+  position: Vector3;
+  text: string;
 }

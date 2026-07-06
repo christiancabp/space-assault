@@ -18,6 +18,7 @@ import { CameraRig } from './CameraRig';
 import { PostFX } from './PostFX';
 import { GameLoop } from './GameLoop';
 import { Player } from '../entities/Player';
+import { MenuShip } from '../entities/MenuShip';
 import { EnemyManager } from '../entities/EnemyManager';
 import { BulletManager } from '../entities/BulletManager';
 import { Stars } from '../entities/Stars';
@@ -51,6 +52,9 @@ export function Game() {
 
       {/* Star field - always rendered for background motion */}
       <Stars />
+
+      {/* Selected ship idling behind the main menu */}
+      {phase === 'menu' && <MenuShip />}
 
       {/* Game entities - only during gameplay */}
       {isPlaying && (

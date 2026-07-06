@@ -13,6 +13,8 @@
 import { useEffect } from 'react';
 import { Game } from './game/Game';
 import { HUD } from './ui/HUD';
+import { LoadingScreen } from './ui/LoadingScreen';
+import { DamageFlash } from './ui/DamageFlash';
 import { StartScreen } from './ui/StartScreen';
 import { GameOverScreen } from './ui/GameOverScreen';
 import { PauseScreen } from './ui/PauseScreen';
@@ -53,8 +55,12 @@ function App() {
       {phase === 'menu' && <StartScreen />}
       {phase === 'shipSelect' && <ShipSelector />}
       {(phase === 'playing' || phase === 'paused') && <HUD />}
+      {(phase === 'playing' || phase === 'paused') && <DamageFlash />}
       {phase === 'paused' && <PauseScreen />}
       {phase === 'gameOver' && <GameOverScreen />}
+
+      {/* Asset loading overlay - covers everything until assets settle */}
+      <LoadingScreen />
     </div>
   );
 }

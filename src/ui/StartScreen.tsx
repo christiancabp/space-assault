@@ -16,7 +16,6 @@ import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useEffectsStore } from '../stores/effectsStore';
 import { getShipConfig } from '../config/shipConfigs';
-import { ShipPreviewCanvas } from '../shipSelector/ShipPreviewCanvas';
 import { AudioSettings } from './AudioSettings';
 
 export function StartScreen() {
@@ -55,43 +54,43 @@ export function StartScreen() {
   }, [handleStart]);
 
   return (
-    <div className="menu-overlay">
+    <div className="menu-overlay start-screen">
       <h1>SPACE ASSAULT</h1>
 
-      <div className="ship-snapshot-section">
-        <div className="ship-snapshot">
-          <ShipPreviewCanvas shipId={selectedShipId} />
-        </div>
+      {/* Transparent gap - the live 3D MenuShip shows through here */}
+      <div className="menu-ship-gap">
         <div className="ship-name">{selectedShipName}</div>
         <button className="secondary change-ship" onClick={openShipSelect}>
           CHANGE SHIP
         </button>
       </div>
 
-      <div className="controls-info">
-        <h2>CONTROLS</h2>
-        <div className="control-row">
-          <span className="key-group">W A S D</span>
-          <span className="control-label">or</span>
-          <span className="key-group">&uarr; &larr; &darr; &rarr;</span>
-          <span className="control-label">Move ship</span>
+      <div className="menu-panels">
+        <div className="controls-info">
+          <h2>CONTROLS</h2>
+          <div className="control-row">
+            <span className="key-group">W A S D</span>
+            <span className="control-label">or</span>
+            <span className="key-group">&uarr; &larr; &darr; &rarr;</span>
+            <span className="control-label">Move ship</span>
+          </div>
+          <div className="control-row">
+            <span className="key-group">Double-tap</span>
+            <span className="control-label">&larr; or &rarr;</span>
+            <span className="control-label">Barrel roll (dodge)</span>
+          </div>
+          <div className="control-row">
+            <span className="key-group">SPACE</span>
+            <span className="control-label">Fire weapons</span>
+          </div>
+          <div className="control-row">
+            <span className="key-group">ENTER</span>
+            <span className="control-label">Pause game</span>
+          </div>
         </div>
-        <div className="control-row">
-          <span className="key-group">Double-tap</span>
-          <span className="control-label">&larr; or &rarr;</span>
-          <span className="control-label">Barrel roll (dodge)</span>
-        </div>
-        <div className="control-row">
-          <span className="key-group">SPACE</span>
-          <span className="control-label">Fire weapons</span>
-        </div>
-        <div className="control-row">
-          <span className="key-group">ENTER</span>
-          <span className="control-label">Pause game</span>
-        </div>
-      </div>
 
-      <AudioSettings />
+        <AudioSettings />
+      </div>
 
       <p className="start-hint">Press ENTER to start</p>
       <button onClick={handleStart}>START GAME</button>

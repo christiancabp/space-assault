@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const MODELS_DIR = new URL('../public/models/', import.meta.url).pathname;
+// Optionally pass a directory to scan: node scripts/measure-glb.mjs public/models/invaders
+const MODELS_DIR = process.argv[2] ?? new URL('../public/models/', import.meta.url).pathname;
 
 function mat4Identity() {
   return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];

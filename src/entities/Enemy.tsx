@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import type { Enemy as EnemyType } from '../types/game.types';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useGameStore } from '../stores/gameStore';
+import { InvaderModel } from '../invaders/InvaderModel';
 import { GAME_CONFIG } from '../config';
 
 interface EnemyProps {
@@ -23,7 +24,7 @@ interface EnemyProps {
 }
 
 export function Enemy({ enemy }: EnemyProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const meshRef = useRef<THREE.Group>(null);
 
   // Store actions
   const removeEnemy = useEnemyStore((state) => state.removeEnemy);
@@ -93,16 +94,9 @@ export function Enemy({ enemy }: EnemyProps) {
     }
   });
 
-  const { ENEMY_SIZE, COLORS } = GAME_CONFIG;
-
   return (
-    <mesh ref={meshRef}>
-      <boxGeometry args={[ENEMY_SIZE.x, ENEMY_SIZE.y, ENEMY_SIZE.z]} />
-      <meshStandardMaterial
-        color={COLORS.enemy}
-        emissive={COLORS.enemy}
-        emissiveIntensity={0.3}
-      />
-    </mesh>
+    <group ref={meshRef}>
+      <InvaderModel type={enemy.invaderType} />
+    </group>
   );
 }
