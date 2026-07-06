@@ -281,21 +281,21 @@ export const SHIP_CONFIGS: Record<ShipId, ShipConfig> = {
   },
 };
 
-// Roster order for browsing in the ship selector
+// Roster order for browsing in the ship selector (most popular first)
 export const SHIP_IDS: ShipId[] = [
+  'starship',
+  'tie-fighter',
   'rocketship',
   'guardians-ship',
   'planet-express',
   'rick-n-morty',
   'sayan-capsule',
   'space-shuttle',
-  'starship',
-  'tie-fighter',
   'time-machine',
 ];
 
 // Default ship when no selection made
-export const DEFAULT_SHIP_ID: ShipId = 'tie-fighter';
+export const DEFAULT_SHIP_ID: ShipId = 'starship';
 
 // Helper to get config with fallback
 export function getShipConfig(shipId: ShipId): ShipConfig {
