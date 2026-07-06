@@ -79,7 +79,7 @@
 
 ---
 
-## Phase 2: Visual Polish (Future)
+## Phase 2: Production Polish - COMPLETE!
 
 - [x] 3D ship models (GLTF)
 - [x] Mobile/touch controls (adaptive play area, joystick + fire + pause overlay)
@@ -94,12 +94,22 @@
 - [x] Better background (CC0 nebula backdrop + bloom post-processing)
 - [x] Better UI/UX design (invuln blink, damage flash, low-lives vignette, score pop + floaters)
 - [x] Enemy 3d models (GLTF) (Space Invaders models; spawn mix TODO in src/stores/enemyStore.ts)
+- [x] Audio settings (music/SFX volume + mute, persisted)
+- [x] Fullscreen on mobile game start (+ home-screen standalone metas for iPhone)
 
-## Phase 3: Gameplay Depth (Future)
+## Phase 3: Deployment & Hardening (Next)
+
+- [ ] Host on a real URL (Vercel/Netlify/S3 - decide)
+- [ ] Code-split the 1.35 MB bundle (three.js/postprocessing chunks)
+- [ ] Bundle the drei Environment HDR locally (currently fetched from an external CDN at runtime)
+- [ ] Error boundary around the Canvas + favicon/meta/social tags
+- [ ] PWA manifest (icon, name, display: standalone)
+
+## Phase 4: Gameplay Depth (Future)
 
 - [ ] Enemy shooting mechanics
 - [ ] Power-ups (spread shot, shields)
-- [ ] Wave-based spawning 
+- [ ] Wave-based spawning
 - [ ] Enemy formations and patterns
 - [ ] Level progression (enemies come in waves starting at level 1 with few enemies more enemies added each level)
 - [ ] Difficulty scaling
@@ -107,58 +117,4 @@
 
 ---
 
-## Controls
-
-- **WASD / Arrow Keys:** Move ship (horizontal + vertical)
-- **Spacebar:** Fire bullets
-
-## Tech Stack
-
-- React 19 + TypeScript + Vite
-- @react-three/fiber (React renderer for Three.js)
-- @react-three/drei (R3F utilities)
-- Zustand (state management)
-
-## File Structure
-
-``` bash
-src/
-├── App.tsx                 # Main app with game + UI layers
-├── index.css               # Global styles, HUD, menus
-├── game/
-│   ├── Game.tsx            # R3F Canvas setup
-│   ├── Scene.tsx           # Lighting, fog, background
-│   └── GameLoop.tsx        # Collision system coordinator
-├── entities/
-│   ├── Player.tsx          # Player movement + shooting
-│   ├── Enemy.tsx           # Enemy behavior (approach → attack)
-│   ├── EnemyManager.tsx    # Enemy spawning
-│   ├── Bullet.tsx          # Bullet movement
-│   ├── BulletManager.tsx   # Bullet rendering
-│   └── Stars.tsx           # Streaming star field
-├── stores/
-│   ├── gameStore.ts        # Game phase, score, lives
-│   ├── playerStore.ts      # Player position
-│   ├── enemyStore.ts       # Enemy array management
-│   └── bulletStore.ts      # Bullet array management
-├── systems/
-│   └── collisionSystem.ts  # AABB collision detection
-├── hooks/
-│   └── useKeyboard.ts      # Keyboard input tracking
-├── types/
-│   └── game.types.ts       # TypeScript type definitions
-├── constants/
-│   └── gameConfig.ts       # All tunable game values
-└── ui/
-    ├── HUD.tsx             # Score + lives display
-    ├── StartScreen.tsx     # Start menu
-    └── GameOverScreen.tsx  # Game over screen
-```
-
-## Key Patterns Used
-
-1. **useFrame game loop** - Frame-rate independent movement with delta time
-2. **Zustand stores** - Granular subscriptions, access outside React via getState()
-3. **useRef for meshes** - Direct manipulation without re-renders
-4. **Entity-Manager pattern** - Manager renders array, Entity handles behavior
-5. **AABB collision** - Simple box intersection for hit detection
+Controls, tech stack, and project structure live in [README.md](README.md); architecture notes for AI-assisted development live in [CLAUDE.md](CLAUDE.md).
