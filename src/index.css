@@ -26,6 +26,11 @@ html, body, #root {
   height: 100%;
   overflow: hidden;
   background-color: var(--color-bg);
+  /* Mobile: no scroll, zoom, pull-to-refresh, or long-press selection */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Main app container - positions canvas and UI overlays */
@@ -83,6 +88,7 @@ html, body, #root {
   align-items: center;
   justify-content: safe center;
   overflow-y: auto;
+  touch-action: pan-y; /* Menus stay scrollable despite the global lock */
   padding: 2rem 0;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.9) 100%);
   text-align: center;
@@ -121,6 +127,116 @@ html, body, #root {
 .menu-overlay button:hover {
   background: var(--color-accent);
   box-shadow: 0 0 20px rgba(74, 158, 255, 0.5);
+}
+
+/* ── Touch controls (coarse-pointer devices, gameplay only) ── */
+.touch-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none; /* Only the controls themselves take touches */
+}
+
+.touch-controls > * {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.touch-joystick {
+  position: absolute;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2px solid rgba(74, 158, 255, 0.4);
+  background: rgba(74, 158, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-joystick-knob {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(74, 158, 255, 0.35);
+  border: 2px solid rgba(74, 158, 255, 0.7);
+  box-shadow: 0 0 14px rgba(74, 158, 255, 0.4);
+}
+
+.touch-fire {
+  position: absolute;
+  left: max(24px, env(safe-area-inset-left));
+  bottom: max(36px, env(safe-area-inset-bottom));
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 68, 68, 0.55);
+  background: rgba(255, 68, 68, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+
+.touch-fire.active {
+  background: rgba(255, 68, 68, 0.35);
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+}
+
+.touch-pause {
+  position: absolute;
+  top: max(64px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* ── Touch devices: keyboard UI is dead weight ─────────────── */
+@media (pointer: coarse) {
+  .start-screen .controls-info,
+  .start-hint {
+    display: none;
+  }
+}
+
+/* ── Phone-sized screens ───────────────────────────────────── */
+@media (max-width: 640px) {
+  .menu-overlay h1 {
+    font-size: clamp(2rem, 10vw, 3rem);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  .menu-ship-gap {
+    min-height: 18vh;
+    margin-bottom: 0.75rem;
+  }
+
+  .menu-panels {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .menu-overlay button {
+    margin-top: 1rem;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
+
+  .hud {
+    padding: 0 16px;
+    font-size: 1rem;
+  }
 }
 
 /* ── Loading screen ────────────────────────────────────────── */

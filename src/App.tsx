@@ -15,6 +15,7 @@ import { Game } from './game/Game';
 import { HUD } from './ui/HUD';
 import { LoadingScreen } from './ui/LoadingScreen';
 import { DamageFlash } from './ui/DamageFlash';
+import { TouchControls } from './ui/TouchControls';
 import { StartScreen } from './ui/StartScreen';
 import { GameOverScreen } from './ui/GameOverScreen';
 import { PauseScreen } from './ui/PauseScreen';
@@ -56,6 +57,7 @@ function App() {
       {phase === 'shipSelect' && <ShipSelector />}
       {(phase === 'playing' || phase === 'paused') && <HUD />}
       {(phase === 'playing' || phase === 'paused') && <DamageFlash />}
+      {phase === 'playing' && <TouchControls />}
       {phase === 'paused' && <PauseScreen />}
       {phase === 'gameOver' && <GameOverScreen />}
 

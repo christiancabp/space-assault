@@ -15,6 +15,7 @@
 import { Canvas } from '@react-three/fiber';
 import { Scene } from './Scene';
 import { CameraRig } from './CameraRig';
+import { PlayAreaManager } from './PlayAreaManager';
 import { PostFX } from './PostFX';
 import { GameLoop } from './GameLoop';
 import { Player } from '../entities/Player';
@@ -43,12 +44,17 @@ export function Game() {
       }}
       // Disable automatic color management for consistent colors
       gl={{ antialias: true }}
+      // Cap device pixel ratio: DPR-3 phones would push 3x pixels through bloom
+      dpr={[1, 2]}
     >
       {/* Scene setup - always rendered */}
       <Scene />
 
       {/* Screen shake rig - applies trauma-based camera shake */}
       <CameraRig />
+
+      {/* Keeps play bounds matched to the visible frustum (portrait phones) */}
+      <PlayAreaManager />
 
       {/* Star field - always rendered for background motion */}
       <Stars />

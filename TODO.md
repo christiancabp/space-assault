@@ -82,7 +82,7 @@
 ## Phase 2: Visual Polish (Future)
 
 - [x] 3D ship models (GLTF)
-- [ ] Mobile/touch controls
+- [x] Mobile/touch controls (adaptive play area, joystick + fire + pause overlay)
 - [x] Upgrade star field to a more realistic one (round twinkling sprites, 2 parallax layers)
 - [x] Custom shaders (explosions, propulsion effects)
 - [x] Particle effects for hits/explosions

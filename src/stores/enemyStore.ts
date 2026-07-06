@@ -15,6 +15,7 @@ import { create } from 'zustand';
 import type { Enemy, Vector3, EnemyPhase } from '../types/game.types';
 import { GAME_CONFIG } from '../config';
 import { REGULAR_INVADERS, type InvaderType } from '../config/enemyConfigs';
+import { usePlayAreaStore } from './playAreaStore';
 
 interface EnemyState {
   enemies: Enemy[];
@@ -93,15 +94,19 @@ function pickInvaderType(): InvaderType {
 export function createEnemy(id: string): Enemy {
   const { ENEMY_SPAWN_Z, ENEMY_SPAWN_X_RANGE, ENEMY_SPAWN_Y_RANGE, ENEMY_APPROACH_SPEED } = GAME_CONFIG;
 
+  // Clamp spawn ranges to the live play bounds so enemies always arrive
+  // inside the visible corridor (narrower on portrait phones)
+  const bounds = usePlayAreaStore.getState().bounds;
+  const xMin = Math.max(ENEMY_SPAWN_X_RANGE.min, bounds.minX);
+  const xMax = Math.min(ENEMY_SPAWN_X_RANGE.max, bounds.maxX);
+  const yMin = Math.max(ENEMY_SPAWN_Y_RANGE.min, bounds.minY);
+  const yMax = Math.min(ENEMY_SPAWN_Y_RANGE.max, bounds.maxY);
+
   // Random X position within spawn range
-  const spawnX =
-    Math.random() * (ENEMY_SPAWN_X_RANGE.max - ENEMY_SPAWN_X_RANGE.min) +
-    ENEMY_SPAWN_X_RANGE.min;
+  const spawnX = Math.random() * (xMax - xMin) + xMin;
 
   // Random Y position within spawn range (vertical variety)
-  const spawnY =
-    Math.random() * (ENEMY_SPAWN_Y_RANGE.max - ENEMY_SPAWN_Y_RANGE.min) +
-    ENEMY_SPAWN_Y_RANGE.min;
+  const spawnY = Math.random() * (yMax - yMin) + yMin;
 
   return {
     id,

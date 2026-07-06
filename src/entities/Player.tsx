@@ -17,7 +17,9 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useKeyboard } from '../hooks/useKeyboard';
+import { touchInput } from '../input/touchInput';
 import { usePlayerStore } from '../stores/playerStore';
+import { usePlayAreaStore } from '../stores/playAreaStore';
 import { useGameStore } from '../stores/gameStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
 import { GAME_CONFIG } from '../config';
@@ -42,6 +44,8 @@ export function Player() {
   const lastLeftPress = useRef(0);
   const lastRightPress = useRef(0);
   const prevKeysRef = useRef<Set<string>>(new Set());
+  const prevTouchLeft = useRef(false);
+  const prevTouchRight = useRef(false);
   const barrelRoll = useRef({ active: false, direction: 0, startTime: 0, startX: 0 });
 
   // Store state and actions
@@ -68,23 +72,30 @@ export function Player() {
     // Don't update when paused or not playing
     if (phase !== 'playing') return;
 
-    const { PLAYER_SPEED, PLAYER_BOUNDS, PLAYER_TILT, BARREL_ROLL } = GAME_CONFIG;
+    const { PLAYER_SPEED, PLAYER_TILT, BARREL_ROLL } = GAME_CONFIG;
+    // Live play bounds (shrinks on narrow/portrait viewports)
+    const PLAYER_BOUNDS = usePlayAreaStore.getState().bounds;
     const keys = keysPressed.current;
     const prevKeys = prevKeysRef.current;
     const now = state.clock.elapsedTime * 1000; // ms
 
-    // Calculate input direction (-1, 0, or 1 for each axis)
+    // Calculate input direction (-1..1 for each axis, keyboard + touch)
     let inputX = 0;
     let inputY = 0;
 
-    // Horizontal input (A/D or Left/Right arrows)
-    const leftPressed = keys.has('KeyA') || keys.has('ArrowLeft');
-    const rightPressed = keys.has('KeyD') || keys.has('ArrowRight');
-    const wasLeftPressed = prevKeys.has('KeyA') || prevKeys.has('ArrowLeft');
-    const wasRightPressed = prevKeys.has('KeyD') || prevKeys.has('ArrowRight');
+    // Horizontal input: keyboard, or joystick deflected past the digital
+    // threshold (lets the existing double-tap logic also catch double-flicks)
+    const leftPressed =
+      keys.has('KeyA') || keys.has('ArrowLeft') || touchInput.moveX < -0.6;
+    const rightPressed =
+      keys.has('KeyD') || keys.has('ArrowRight') || touchInput.moveX > 0.6;
+    const wasLeftPressed = prevKeys.has('KeyA') || prevKeys.has('ArrowLeft') || prevTouchLeft.current;
+    const wasRightPressed = prevKeys.has('KeyD') || prevKeys.has('ArrowRight') || prevTouchRight.current;
+    prevTouchLeft.current = touchInput.moveX < -0.6;
+    prevTouchRight.current = touchInput.moveX > 0.6;
 
-    if (leftPressed) inputX -= 1;
-    if (rightPressed) inputX += 1;
+    if (keys.has('KeyA') || keys.has('ArrowLeft')) inputX -= 1;
+    if (keys.has('KeyD') || keys.has('ArrowRight')) inputX += 1;
 
     // Vertical input (W/S or Up/Down arrows)
     if (keys.has('KeyW') || keys.has('ArrowUp')) {
@@ -93,6 +104,10 @@ export function Player() {
     if (keys.has('KeyS') || keys.has('ArrowDown')) {
       inputY -= 1;
     }
+
+    // Merge analog joystick input
+    inputX = THREE.MathUtils.clamp(inputX + touchInput.moveX, -1, 1);
+    inputY = THREE.MathUtils.clamp(inputY + touchInput.moveY, -1, 1);
 
     // Double-tap detection for barrel roll
     if (!barrelRoll.current.active) {
@@ -186,8 +201,8 @@ export function Player() {
     // Sync position to store for collision detection
     setPosition({ x: finalX, y: newY });
 
-    // Shooting (Space key)
-    if (keys.has('Space')) {
+    // Shooting (Space key or touch fire button)
+    if (keys.has('Space') || touchInput.firing) {
       const now = state.clock.elapsedTime * 1000; // Convert to ms
       if (now - lastShotTime.current > GAME_CONFIG.PLAYER_FIRE_RATE) {
         // Create and add new bullet

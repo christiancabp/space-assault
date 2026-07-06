@@ -16,6 +16,7 @@ import { useBulletStore } from '../stores/bulletStore';
 import { usePlayerStore } from '../stores/playerStore';
 import { useEffectsStore } from '../stores/effectsStore';
 import { getShipConfig } from '../config/shipConfigs';
+import { enterFullscreen } from '../input/touchInput';
 import { AudioSettings } from './AudioSettings';
 
 export function StartScreen() {
@@ -30,6 +31,9 @@ export function StartScreen() {
 
   // Handle game start - clear any leftover state and begin
   const handleStart = useCallback(() => {
+    // On mobile, go fullscreen (hides browser URL bar and bottom controls)
+    enterFullscreen();
+
     // Clear any entities from previous game
     clearEnemies();
     clearBullets();

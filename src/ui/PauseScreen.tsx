@@ -52,7 +52,7 @@ export function PauseScreen() {
     <div className="menu-overlay pause-screen">
       <h1>PAUSED</h1>
 
-      <p>Press ENTER to resume</p>
+      <p className="start-hint">Press ENTER to resume</p>
 
       <AudioSettings />
 
