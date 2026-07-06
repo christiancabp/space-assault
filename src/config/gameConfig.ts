@@ -151,8 +151,8 @@ export const GAME_CONFIG = {
   // BLOOM POST-PROCESSING
   // ============================================
   BLOOM: {
-    intensity: 1.1,
-    luminanceThreshold: 0.3,           // Only colors brighter than this glow
+    intensity: 2.5,
+    luminanceThreshold: 0.4,           // Only colors brighter than this glow
     luminanceSmoothing: 0.25,
     mipmapBlur: true,
   },
