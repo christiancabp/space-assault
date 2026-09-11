@@ -20,6 +20,7 @@ import { TouchControls } from './ui/TouchControls';
 import { StartScreen } from './ui/StartScreen';
 import { GameOverScreen } from './ui/GameOverScreen';
 import { PauseScreen } from './ui/PauseScreen';
+import { Watermark } from './ui/Watermark';
 import { ShipSelector } from './shipSelector/ShipSelector';
 import { useGameStore } from './stores/gameStore';
 import { initAudio } from './audio/soundManager';
@@ -64,6 +65,9 @@ function App() {
       {phase === 'playing' && <TouchControls />}
       {phase === 'paused' && <PauseScreen />}
       {phase === 'gameOver' && <GameOverScreen />}
+
+      {/* Author signature - non-gameplay screens only, never during play */}
+      {(phase === 'menu' || phase === 'shipSelect' || phase === 'gameOver') && <Watermark />}
 
       {/* Asset loading overlay - covers everything until assets settle */}
       <LoadingScreen />

@@ -197,6 +197,137 @@ html, body, #root {
   margin-top: 1rem;
 }
 
+/* ── Developer watermark (author signature, non-gameplay screens) ──
+   HUD-style corner mark: quiet callsign at rest, "locks on" on hover. */
+.dev-watermark {
+  position: absolute;
+  bottom: 1rem;
+  left: 1.25rem;
+  z-index: 50; /* above menu overlays, below LoadingScreen (100) / error (200) */
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: left;
+  pointer-events: none; /* only the links catch pointer events */
+  animation: watermark-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dev-watermark-name {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Live-readout diamond: a soft accent pulse, like a telemetry indicator */
+.dev-watermark-mark {
+  color: var(--color-accent);
+  animation: diamond-pulse 3.2s ease-in-out infinite;
+}
+
+.dev-watermark-links {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  pointer-events: auto;
+}
+
+.dev-watermark-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.1rem 0.15rem 0.25rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(120, 180, 255, 0.8);
+  transition: color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+.dev-watermark-icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex-shrink: 0;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+/* Scanline underline that sweeps in from the left on hover ("signal lock") */
+.dev-watermark-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent) 45%, #fff);
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.9);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dev-watermark-link:hover,
+.dev-watermark-link:focus-visible {
+  color: #fff;
+  transform: translateY(-1px);
+  text-shadow: 0 0 12px rgba(74, 158, 255, 0.9);
+  outline: none;
+}
+
+.dev-watermark-link:hover::after,
+.dev-watermark-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Icons power up with a bloom glow on hover */
+.dev-watermark-link:hover .dev-watermark-icon,
+.dev-watermark-link:focus-visible .dev-watermark-icon {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 6px rgba(74, 158, 255, 0.95));
+}
+
+/* The space invader breaks into the classic two-frame arcade march */
+.dev-watermark-link:hover .invader-icon,
+.dev-watermark-link:focus-visible .invader-icon {
+  animation: invader-march 0.7s infinite;
+}
+
+.dev-watermark-sep {
+  color: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+@keyframes watermark-in {
+  from { opacity: 0; transform: translateY(10px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes diamond-pulse {
+  0%, 100% { opacity: 0.5; text-shadow: 0 0 4px rgba(74, 158, 255, 0.35); }
+  50%      { opacity: 1;   text-shadow: 0 0 10px rgba(74, 158, 255, 0.9); }
+}
+
+/* Hard cut between the two frames (0->-2.5px) = the arcade shuffle, not a
+   smooth bob. Scale is baked in so it survives alongside the march. */
+@keyframes invader-march {
+  0%, 50%      { transform: translateY(0)      scale(1.15); }
+  50.01%, 100% { transform: translateY(-2.5px) scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-watermark,
+  .dev-watermark-mark,
+  .dev-watermark-link,
+  .dev-watermark-icon,
+  .dev-watermark-link::after,
+  .invader-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 /* ── Touch controls (coarse-pointer devices, gameplay only) ── */
 .touch-controls {
   position: absolute;
