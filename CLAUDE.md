@@ -121,6 +121,8 @@ A LoadingScreen overlay (drei `useProgress`) covers everything until assets sett
 
 A toggleable autopilot that plays in real time using TypeSafe's Jev model. Off by default; press **P** (or the HUD button) during play to engage; any movement key or a second press hands control back.
 
+**Hidden feature:** the pilot's UI (button, mini-map, readout) and the P hotkey only appear when the app is opened at the **`/ai-pilot`** route — gated by `AI_PILOT_UNLOCKED` in `src/ai/featureFlag.ts` (pathname ends with `/ai-pilot`). `vercel.json` has an SPA rewrite (`/(.*) → /index.html`, excluding `/api/`) so that path serves the app in prod. Everywhere else the game shows no trace of it and the controller isn't even mounted (no requests possible).
+
 - **Flow:** `AiPilotController` (headless, mounted in `App` *outside* the Canvas) runs a self-clocked, single-flight loop while engaged and `phase==='playing'`: `buildPilotState()` → POST `/api/pilot` → `decisionToInput()` writes `aiInput`; `Player` executes `aiInput` every frame (same mutable-module pattern as `touchInput`).
 - **Decision:** one parallel request asks Jev three Choice questions — `mode` (attack/evade), `aim_horizontal`, `aim_vertical`. Code composes them: attack = steer toward the most urgent enemy cell; evade (last resort) = barrel-roll dodge whose i-frames phase through the collision. Firing is **always-on** while engaged (ABS — "always be shooting"), decided in code, not the model. Threat model: enemies never shoot — the only danger is a diving invader colliding. Question wording lives in `api/_pilotCore.ts` and is the main behavior lever.
 - **State & instruments:** the snapshot is a 2D grid (`AI_PILOT.gridCols×gridRows`, imminence 0-9) from `src/ai/grid.ts` — enemies are fixed cells (only z advances; see Enemy.tsx), so it's a clean matrix. The same grid renders live as a mini-map (`src/ui/MiniMap.tsx`, "AI VIEW", top-right, desktop only). KPI: `gameStore.enemyScore` (+10 per invader that escapes past the ship, hooked at Enemy.tsx's despawn) shows in the HUD as "ENEMY" — low enemy score vs high player score = a good pilot. `src/ai/trace.ts` logs spawn/kill/escape when `AI_PILOT.trace` is on.
@@ -148,7 +150,7 @@ Play bounds are NOT fixed: `PlayAreaManager` intersects the designed `PLAYER_BOU
 
 ## Controls
 
-**Keyboard:** WASD/Arrows move · Space fires · double-tap Left/Right barrel-rolls (invincible dodge) · Enter starts/pauses/resumes/restarts · **P** toggles the AI pilot (`/api/pilot` is served in dev by a Vite middleware, so plain `npm run dev` works)
+**Keyboard:** WASD/Arrows move · Space fires · double-tap Left/Right barrel-rolls (invincible dodge) · Enter starts/pauses/resumes/restarts · **P** toggles the AI pilot — but only on the hidden `/ai-pilot` route (`/api/pilot` is served in dev by a Vite middleware, so plain `npm run dev` works)
 
 **Touch** (coarse-pointer devices only, during gameplay): joystick bottom-right (double-flick = barrel roll) · hold-to-fire bottom-left · pause top-right. START GAME requests fullscreen on mobile (iPhone Safari lacks the API - standalone home-screen launch is its fullscreen path).
 
