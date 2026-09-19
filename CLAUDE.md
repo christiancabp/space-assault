@@ -14,11 +14,10 @@ Space Assault is a 3D space shooter game built with React Three Fiber. It's a Ga
 ## Development Commands
 
 ```bash
-npm run dev      # Start dev server with HMR (localhost:5173)
+npm run dev      # Start dev server with HMR + local /api/pilot middleware (localhost:5173)
 npm run build    # Type-check with tsc then bundle with Vite
 npm run lint     # Run ESLint on all files
 npm run preview  # Preview production build locally
-npx vercel dev   # Run the game + /api/pilot together (needed for the AI pilot)
 ```
 
 ## Tech Stack
@@ -68,6 +67,7 @@ public/
 └── manifest.webmanifest    # PWA manifest (standalone, portrait)
 
 api/
+├── _pilotCore.ts           # Shared TypeSafe questions + decision (used by the fn AND Vite dev middleware)
 └── pilot.ts                # Vercel serverless fn — TypeSafe proxy (keeps TYPESAFE_API_KEY server-side)
 ```
 
@@ -123,7 +123,7 @@ A toggleable autopilot that plays in real time using TypeSafe's Jev model. Off b
 
 - **Flow:** `AiPilotController` (headless, mounted in `App` *outside* the Canvas) runs a self-clocked, single-flight loop while engaged and `phase==='playing'`: `buildPilotState()` → POST `/api/pilot` → `decisionToInput()` writes `aiInput`; `Player` executes `aiInput` every frame (same mutable-module pattern as `touchInput`).
 - **Decision:** one parallel request asks Jev four questions — `mode` (attack/evade), `aim_horizontal`, `aim_vertical` (Choices) and `fire` (Noul). Code composes them: attack = aim under the nearest invader + fire; evade (last resort) = barrel-roll dodge whose i-frames phase through the collision. Threat model: enemies never shoot — the only danger is a diving invader colliding. Question wording lives server-side in `api/pilot.ts` and is the main behavior lever.
-- **Key handling:** `api/pilot.ts` is a Vercel Node function that reads `TYPESAFE_API_KEY` from env (never the browser; the SDK's `dangerouslyAllowBrowser` stays false). Locally it needs `npx vercel dev` — plain `npm run dev` has no `/api`. Put the key in `.env.local` (gitignored) and in the Vercel project for prod. `/api` is excluded from the app's `tsc` build (Vercel builds it); an ESLint override gives it Node globals.
+- **Key handling:** the decision core (questions + SDK call) lives in `api/_pilotCore.ts`. Production uses the Vercel Node function `api/pilot.ts`; local dev uses a Vite dev-server middleware in `vite.config.ts` — both share the core, so **`npm run dev` serves `/api/pilot` with no extra tooling** (`vercel dev` not required). `TYPESAFE_API_KEY` is read server-side only (never the browser; the SDK's `dangerouslyAllowBrowser` stays false): from `.env.local` (gitignored) locally, the Vercel project env in prod. `/api/*` is excluded from the app's `tsc` build (Vercel builds it), but `vite.config.ts` imports `_pilotCore` so it IS type-checked by the node project; an ESLint override gives `api/**` + `vite.config.ts` Node globals.
 - **Request budget:** deliberately conservative — off by default, one request in flight, a `minTickIntervalMs` throttle, a `maxRequestsPerEngage` auto-disengage cap, and auto-disable after `maxConsecutiveFailures`. All in `GAME_CONFIG.AI_PILOT`. The pure `buildPilotState`/`decisionToInput` are isolated for unit testing (no test runner configured yet).
 
 ## Configuration
@@ -147,7 +147,7 @@ Play bounds are NOT fixed: `PlayAreaManager` intersects the designed `PLAYER_BOU
 
 ## Controls
 
-**Keyboard:** WASD/Arrows move · Space fires · double-tap Left/Right barrel-rolls (invincible dodge) · Enter starts/pauses/resumes/restarts · **P** toggles the AI pilot (needs `vercel dev` for `/api/pilot`)
+**Keyboard:** WASD/Arrows move · Space fires · double-tap Left/Right barrel-rolls (invincible dodge) · Enter starts/pauses/resumes/restarts · **P** toggles the AI pilot (`/api/pilot` is served in dev by a Vite middleware, so plain `npm run dev` works)
 
 **Touch** (coarse-pointer devices only, during gameplay): joystick bottom-right (double-flick = barrel roll) · hold-to-fire bottom-left · pause top-right. START GAME requests fullscreen on mobile (iPhone Safari lacks the API - standalone home-screen launch is its fullscreen path).
 
@@ -159,4 +159,4 @@ CC0 audio/textures came from OpenGameArt (direct file URLs work with curl; kenne
 
 Live at <https://space-assault.vercel.app/>; push-to-main deploys prod. `vercel.json` sets `Cache-Control: immutable, max-age=1y` on `/models`, `/sounds`, `/textures`, `/hdri`. These paths are NOT content-hashed — when replacing an asset, RENAME the file (e.g. `nebula2.webp`), or returning visitors keep the stale cached copy for a year. Vite-hashed JS/CSS and index.html use Vercel defaults and are safe.
 
-The AI pilot adds a serverless function at `api/pilot.ts`. Set `TYPESAFE_API_KEY` in the Vercel project's Environment Variables (server-side only) for it to work in prod; locally run `npx vercel dev` to serve `/api/pilot` alongside Vite.
+The AI pilot's endpoint is a serverless function at `api/pilot.ts` (sharing `api/_pilotCore.ts`). Set `TYPESAFE_API_KEY` in the Vercel project's Environment Variables (server-side only) for it to work in prod. Locally, `npm run dev` serves `/api/pilot` via a Vite dev middleware, so no `vercel dev` is required.

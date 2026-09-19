@@ -21,8 +21,9 @@ export default defineConfig([
     },
   },
   {
-    // Server-side Vercel function: Node globals, and not a React component module
-    files: ['api/**/*.{ts,tsx}'],
+    // Server-side code (Vercel function + Vite dev middleware): Node globals,
+    // and not React component modules.
+    files: ['api/**/*.{ts,tsx}', 'vite.config.ts'],
     languageOptions: {
       globals: globals.node,
     },

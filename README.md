@@ -49,16 +49,28 @@ Starting the game goes fullscreen on Android/iPad. On iPhone, use Safari's **Add
 
 ## AI Pilot (TypeSafe)
 
-Press **P** in-game to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. A few times per second it sends a small 2D-plane snapshot of the playfield to a serverless function, which asks Jev four typed questions (attack vs. evade, horizontal aim, vertical aim, fire) and returns a decision the ship executes every frame.
+Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. A few times per second it sends a small 2D-plane snapshot of the playfield to a server-side endpoint, which asks Jev four typed questions (attack vs. evade, horizontal aim, vertical aim, fire) and returns a decision the ship executes every frame. The HUD shows the live decision.
 
-The API key must stay server-side, so the pilot needs the `/api/pilot` function running. That means it works under `vercel dev` (and in production) — **not** under plain `npm run dev`:
+### Run it locally
+
+The pilot needs a TypeSafe API key, which must stay server-side. In local dev, `npm run dev` serves the `/api/pilot` endpoint via a Vite middleware — no extra tooling required:
 
 ```bash
 cp .env.example .env.local        # then paste your TypeSafe key into .env.local
-npx vercel dev                    # serves the game + /api/pilot together
+npm run dev                       # game + /api/pilot on http://localhost:5173
 ```
 
-For production, set `TYPESAFE_API_KEY` in the Vercel project's Environment Variables. The request rate is deliberately conservative (off by default, one request in flight, a minimum gap between requests, and an auto-disengage cap per engagement) — all tunable in `GAME_CONFIG.AI_PILOT`.
+Then open <http://localhost:5173>, start a game, and press **P**.
+
+> The key is read only by the dev server (and, in production, the serverless function) — it is never bundled into the browser. With no key in `.env.local`, the pilot button simply reports an error and normal play is unaffected.
+
+### Deploy (production)
+
+In production the endpoint is a Vercel serverless function (`api/pilot.ts`). Set `TYPESAFE_API_KEY` in the Vercel project's **Environment Variables**; it ships automatically with the app.
+
+### Request budget
+
+Deliberately conservative by default: off until you engage, one request in flight at a time, a minimum gap between requests (`minTickIntervalMs`), and an auto-disengage cap per engagement (`maxRequestsPerEngage`). All knobs live in `GAME_CONFIG.AI_PILOT`.
 
 ## Tech Stack
 
@@ -100,6 +112,7 @@ src/
 └── ui/               # HUD, menus, loading screen, touch controls, audio settings
 
 api/
+├── _pilotCore.ts     # Shared TypeSafe questions + decision (fn + Vite dev middleware)
 └── pilot.ts          # Vercel serverless function — TypeSafe proxy (keeps the key server-side)
 ```
 
