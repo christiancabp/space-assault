@@ -193,7 +193,8 @@ export const GAME_CONFIG = {
     gridRows: 5,                     // Enemy-tracking grid height (rows)
     requestTimeoutMs: 1000,          // Abort a decision tick that exceeds this
     minTickIntervalMs: 300,          // Min wall-clock between requests (~3/sec) for responsive real-time aim
-    maxRequestsPerEngage: 40,        // Safety cap: auto-disengage after this many requests per engagement (~12s)
+    maxRequestsPerEngage: 1000,      // Runaway backstop only (~5 min at current cadence). Normal stops are
+                                     // death / toggle-off / tab-hidden — NOT this cap. Lower it to add a governor.
     maxConsecutiveFailures: 5,       // Auto-disable the pilot after this many failed ticks
     failureBackoffMs: 300,           // Extra wait after a failed tick before retrying
     trace: true,                     // TEMP: log enemy spawn/kill/escape events to the console for study
