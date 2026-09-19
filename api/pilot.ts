@@ -3,8 +3,8 @@
  *
  * Runs server-side on Vercel's Node runtime so the TYPESAFE_API_KEY never
  * reaches the browser. The browser POSTs a compact game-state snapshot; this
- * returns a normalized PilotDecision. The actual questions + response shape live
- * in ./_pilotCore.ts (shared with the local Vite dev middleware).
+ * returns a normalized PilotDecision. The actual questions + HTTP call live in
+ * ./_pilotCore.ts (shared with the local Vite dev middleware).
  *
  * NOTE: this file is built by Vercel, not by the app's `tsc` (tsconfig excludes
  * /api). Keep the response shape in sync with src/ai/types.ts by hand.
@@ -14,7 +14,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { decidePilot, APIError } from './_pilotCore';
+import { decidePilot } from './_pilotCore';
 
 export default async function handler(
   req: VercelRequest,
@@ -33,7 +33,8 @@ export default async function handler(
     return;
   }
 
-  if (!process.env.TYPESAFE_API_KEY) {
+  const apiKey = process.env.TYPESAFE_API_KEY;
+  if (!apiKey) {
     res
       .status(500)
       .json({ error: 'TYPESAFE_API_KEY is not configured on the server' });
@@ -41,13 +42,10 @@ export default async function handler(
   }
 
   try {
-    const decision = await decidePilot(state);
+    const decision = await decidePilot(state, apiKey);
     res.status(200).json(decision);
   } catch (err) {
-    const status = err instanceof APIError ? err.status : 502;
     console.error('[pilot] upstream error', err);
-    res.status(status >= 400 && status < 600 ? status : 502).json({
-      error: 'AI pilot upstream error',
-    });
+    res.status(502).json({ error: 'AI pilot upstream error' });
   }
 }
