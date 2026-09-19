@@ -23,6 +23,7 @@ Open <http://localhost:5173>. To play on your phone during development, run `npm
 | Space | Fire |
 | Double-tap Left/Right | Barrel roll (invincible dodge) |
 | Enter | Start / Pause / Resume / Restart |
+| P | Toggle AI Pilot (TypeSafe autopilot) during play |
 
 ### Touch (phones & tablets)
 
@@ -44,6 +45,20 @@ Starting the game goes fullscreen on Android/iPad. On iPhone, use Safari's **Add
 - Cinematic main menu with the selected ship idling live in the scene
 - Loading screen, pause/resume, score + lives HUD
 - Adaptive play area: portrait phones get a tall, thin corridor — the ship never leaves the screen
+- **AI Pilot (experimental):** press `P` to let a TypeSafe (Jev) model fly the ship in real time — it hunts invaders and barrel-rolls to dodge as a last resort, with a live HUD readout of its decisions
+
+## AI Pilot (TypeSafe)
+
+Press **P** in-game to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. A few times per second it sends a small 2D-plane snapshot of the playfield to a serverless function, which asks Jev four typed questions (attack vs. evade, horizontal aim, vertical aim, fire) and returns a decision the ship executes every frame.
+
+The API key must stay server-side, so the pilot needs the `/api/pilot` function running. That means it works under `vercel dev` (and in production) — **not** under plain `npm run dev`:
+
+```bash
+cp .env.example .env.local        # then paste your TypeSafe key into .env.local
+npx vercel dev                    # serves the game + /api/pilot together
+```
+
+For production, set `TYPESAFE_API_KEY` in the Vercel project's Environment Variables. The request rate is deliberately conservative (off by default, one request in flight, a minimum gap between requests, and an auto-disengage cap per engagement) — all tunable in `GAME_CONFIG.AI_PILOT`.
 
 ## Tech Stack
 
@@ -68,6 +83,7 @@ node scripts/measure-glb.mjs [dir]  # Print GLB bounding boxes (for model config
 ```text
 src/
 ├── App.tsx           # Game + UI overlay orchestration
+├── ai/               # AI pilot: state snapshot, decision mapping, client, controller
 ├── audio/            # Web Audio sound manager
 ├── config/           # gameConfig (tunables), shipConfigs, enemyConfigs
 ├── effects/          # Explosions, score floaters, engine flames (GLSL)
@@ -82,6 +98,9 @@ src/
 ├── systems/          # Collision detection
 ├── types/            # TypeScript definitions
 └── ui/               # HUD, menus, loading screen, touch controls, audio settings
+
+api/
+└── pilot.ts          # Vercel serverless function — TypeSafe proxy (keeps the key server-side)
 ```
 
 ## Tuning

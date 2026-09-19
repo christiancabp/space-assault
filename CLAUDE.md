@@ -18,6 +18,7 @@ npm run dev      # Start dev server with HMR (localhost:5173)
 npm run build    # Type-check with tsc then bundle with Vite
 npm run lint     # Run ESLint on all files
 npm run preview  # Preview production build locally
+npx vercel dev   # Run the game + /api/pilot together (needed for the AI pilot)
 ```
 
 ## Tech Stack
@@ -34,6 +35,8 @@ npm run preview  # Preview production build locally
 ``` bash
 src/
 ├── App.tsx                 # Game + UI overlay orchestration
+├── ai/                     # AI pilot (TypeSafe/Jev): aiInput, pilotState, pilotMapping,
+│                           # pilotClient, AiPilotController (self-clocked decision loop)
 ├── audio/                  # soundManager.ts - Web Audio SFX/music (gain buses, phase-driven)
 ├── config/
 │   ├── gameConfig.ts       # Tunable values (speeds, bounds, EXPLOSIONS, SCREEN_SHAKE, AUDIO, BLOOM, UI)
@@ -49,7 +52,8 @@ src/
 ├── ships/                  # ShipModel (config-driven, drei <Clone>, boot-preloads selected ship)
 ├── shipSelector/           # Ship carousel + preview canvas
 ├── stores/                 # Zustand: game, player, enemy, bullet, effects (explosions/floaters/
-│                           # trauma), settings (persisted audio prefs), playArea (live bounds)
+│                           # trauma), settings (persisted audio prefs), playArea (live bounds),
+│                           # aiPilot (autopilot enabled/status/last decision)
 ├── systems/                # collisionSystem (also triggers explosion/shake/SFX feedback)
 ├── types/                  # game.types.ts, ship.types.ts
 └── ui/                     # HUD, menus, LoadingScreen, DamageFlash, TouchControls,
@@ -62,6 +66,9 @@ public/
 ├── hdri/                   # night.hdr - self-hosted drei "night" preset (CC0)
 ├── icon.svg + *.png        # Favicon / PWA / apple-touch icons
 └── manifest.webmanifest    # PWA manifest (standalone, portrait)
+
+api/
+└── pilot.ts                # Vercel serverless fn — TypeSafe proxy (keeps TYPESAFE_API_KEY server-side)
 ```
 
 ### 3D Models
@@ -85,7 +92,7 @@ All models are CC-BY-4.0 (see `public/models/ATTRIBUTION.md` and the in-game CRE
 4. **Entity-Manager pattern** - Manager subscribes to array, Entity handles its own behavior (also used for explosions and score floaters)
 5. **Layered rendering** - R3F Canvas always renders; HTML UI overlays conditionally based on game phase
 6. **Direct store calls, no event bus** - collisionSystem triggers feedback (spawnExplosion, addTrauma, playSfx) the same way it removes entities
-7. **Module-level mutable input** - keyboard Set and touchInput object are read in useFrame without re-renders; Player merges both (stick deflection >0.6 = digital press, so double-tap logic covers double-flick)
+7. **Module-level mutable input** - keyboard Set and touchInput object are read in useFrame without re-renders; Player merges both (stick deflection >0.6 = digital press, so double-tap logic covers double-flick). The AI pilot adds a third source, `aiInput` (src/ai/aiInput.ts); when engaged Player reads it instead of keyboard/touch
 8. **Trauma screen shake** - hits add trauma (0..1), CameraRig renders trauma² as detuned-sine offsets and decays it
 
 ### Lint Gotchas (React Compiler rules)
@@ -110,6 +117,15 @@ In-browser checks use Chrome DevTools MCP: dispatch synthetic `KeyboardEvent`s/`
 
 A LoadingScreen overlay (drei `useProgress`) covers everything until assets settle. The camera belongs to CameraRig in all phases: cinematic drift on the menu, eased transition into the gameplay pose on start, trauma shake during play.
 
+## AI Pilot (TypeSafe / Jev)
+
+A toggleable autopilot that plays in real time using TypeSafe's Jev model. Off by default; press **P** (or the HUD button) during play to engage; any movement key or a second press hands control back.
+
+- **Flow:** `AiPilotController` (headless, mounted in `App` *outside* the Canvas) runs a self-clocked, single-flight loop while engaged and `phase==='playing'`: `buildPilotState()` → POST `/api/pilot` → `decisionToInput()` writes `aiInput`; `Player` executes `aiInput` every frame (same mutable-module pattern as `touchInput`).
+- **Decision:** one parallel request asks Jev four questions — `mode` (attack/evade), `aim_horizontal`, `aim_vertical` (Choices) and `fire` (Noul). Code composes them: attack = aim under the nearest invader + fire; evade (last resort) = barrel-roll dodge whose i-frames phase through the collision. Threat model: enemies never shoot — the only danger is a diving invader colliding. Question wording lives server-side in `api/pilot.ts` and is the main behavior lever.
+- **Key handling:** `api/pilot.ts` is a Vercel Node function that reads `TYPESAFE_API_KEY` from env (never the browser; the SDK's `dangerouslyAllowBrowser` stays false). Locally it needs `npx vercel dev` — plain `npm run dev` has no `/api`. Put the key in `.env.local` (gitignored) and in the Vercel project for prod. `/api` is excluded from the app's `tsc` build (Vercel builds it); an ESLint override gives it Node globals.
+- **Request budget:** deliberately conservative — off by default, one request in flight, a `minTickIntervalMs` throttle, a `maxRequestsPerEngage` auto-disengage cap, and auto-disable after `maxConsecutiveFailures`. All in `GAME_CONFIG.AI_PILOT`. The pure `buildPilotState`/`decisionToInput` are isolated for unit testing (no test runner configured yet).
+
 ## Configuration
 
 Configuration is split across `src/config/`:
@@ -131,7 +147,7 @@ Play bounds are NOT fixed: `PlayAreaManager` intersects the designed `PLAYER_BOU
 
 ## Controls
 
-**Keyboard:** WASD/Arrows move · Space fires · double-tap Left/Right barrel-rolls (invincible dodge) · Enter starts/pauses/resumes/restarts
+**Keyboard:** WASD/Arrows move · Space fires · double-tap Left/Right barrel-rolls (invincible dodge) · Enter starts/pauses/resumes/restarts · **P** toggles the AI pilot (needs `vercel dev` for `/api/pilot`)
 
 **Touch** (coarse-pointer devices only, during gameplay): joystick bottom-right (double-flick = barrel roll) · hold-to-fire bottom-left · pause top-right. START GAME requests fullscreen on mobile (iPhone Safari lacks the API - standalone home-screen launch is its fullscreen path).
 
@@ -142,3 +158,5 @@ CC0 audio/textures came from OpenGameArt (direct file URLs work with curl; kenne
 ## Deployment (Vercel)
 
 Live at <https://space-assault.vercel.app/>; push-to-main deploys prod. `vercel.json` sets `Cache-Control: immutable, max-age=1y` on `/models`, `/sounds`, `/textures`, `/hdri`. These paths are NOT content-hashed — when replacing an asset, RENAME the file (e.g. `nebula2.webp`), or returning visitors keep the stale cached copy for a year. Vite-hashed JS/CSS and index.html use Vercel defaults and are safe.
+
+The AI pilot adds a serverless function at `api/pilot.ts`. Set `TYPESAFE_API_KEY` in the Vercel project's Environment Variables (server-side only) for it to work in prod; locally run `npx vercel dev` to serve `/api/pilot` alongside Vite.
