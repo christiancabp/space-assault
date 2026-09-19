@@ -51,7 +51,18 @@ Starting the game goes fullscreen on Android/iPad. On iPhone, use Safari's **Add
 
 > **Hidden feature:** the AI pilot only appears at the **`/ai-pilot`** route (e.g. `localhost:5173/ai-pilot` or `space-assault.vercel.app/ai-pilot`). On any other path the game plays normally with no trace of it.
 
-Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. A few times per second it sends a small 2D-plane snapshot of the playfield to a server-side endpoint, which asks Jev three typed questions (attack vs. evade, horizontal aim, vertical aim) and returns a decision the ship executes every frame. Firing is always-on while engaged (ABS — "always be shooting", like holding the fire button). The playfield is sent as a small 2D grid, which also renders as a live "AI VIEW" mini-map, and the HUD shows the live decision plus an "ENEMY" score (+10 per invader that escapes) as the pilot's quality gauge.
+Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. It hunts invaders, aims, and barrel-rolls to dodge — playing the game for you in real time.
+
+### How it works
+
+A small real-time control loop around Jev:
+
+1. **The board is a matrix.** Enemies keep their spawn x/y and only fly toward you (in z), so from behind the ship it's a 2D grid where only the ship moves. The game bins the playfield into an 11×5 grid; each enemy's distance becomes an *imminence* score (1 = far, 9 = about to reach you). That grid is exactly what the model sees — and what the "AI VIEW" mini-map draws.
+2. **The model decides strategy (~2×/sec).** One request asks Jev three typed questions over the grid: **attack or evade**, and **which way** to move (horizontal + vertical) toward the most urgent invader.
+3. **Code lands the shot (every frame).** The model's left/right/up/down is coarse, so a per-frame *vernier* steers precisely onto the target invader's exact position once the ship is close — this is what makes it hit reliably instead of spraying near-misses.
+4. **Always be shooting.** While engaged the ship holds the trigger down, just like a human leaving the fire button pressed.
+
+The HUD shows the live decision and an **ENEMY** score (+10 per invader that escapes past you). When you die, the **Game Over** screen reports session stats: kills vs escapes, kill rate, decisions/sec, requests/sec, and time engaged.
 
 ### Run it locally
 
@@ -72,7 +83,7 @@ In production the endpoint is a Vercel serverless function (`api/pilot.ts`). Set
 
 ### Request budget
 
-Deliberately conservative by default: off until you engage, one request in flight at a time, a minimum gap between requests (`minTickIntervalMs`), and an auto-disengage cap per engagement (`maxRequestsPerEngage`). All knobs live in `GAME_CONFIG.AI_PILOT`.
+Deliberately conservative: off until you engage, one request in flight at a time, a minimum gap between requests (`minTickIntervalMs`, ~2/sec since the per-frame vernier handles fine aim), a runaway backstop (`maxRequestsPerEngage`), and auto-disable after repeated failures. It also stops on death, toggle-off, or the tab going hidden. All knobs live in `GAME_CONFIG.AI_PILOT`.
 
 ## Tech Stack
 
