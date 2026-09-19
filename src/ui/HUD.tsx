@@ -17,6 +17,7 @@
 import { useGameStore } from '../stores/gameStore';
 import { useAiPilotStore } from '../stores/aiPilotStore';
 import { MiniMap } from './MiniMap';
+import { AI_PILOT_UNLOCKED } from '../ai/featureFlag';
 import { GAME_CONFIG } from '../config';
 
 /**
@@ -81,21 +82,26 @@ export function HUD() {
         </div>
       </div>
 
-      <div className="ai-hud">
-        <button
-          className={`ai-toggle${aiEnabled ? ' active' : ''}`}
-          onClick={(event) => {
-            toggleAi();
-            // Drop focus so Space/Enter don't re-trigger the button mid-game
-            event.currentTarget.blur();
-          }}
-        >
-          {aiEnabled ? '■ AI PILOT ENGAGED' : `▶ AI PILOT  (${toggleKeyLabel})`}
-        </button>
-        {aiEnabled && <AiReadout />}
-      </div>
+      {/* Hidden feature: only shown when opened at the /ai-pilot route */}
+      {AI_PILOT_UNLOCKED && (
+        <>
+          <div className="ai-hud">
+            <button
+              className={`ai-toggle${aiEnabled ? ' active' : ''}`}
+              onClick={(event) => {
+                toggleAi();
+                // Drop focus so Space/Enter don't re-trigger the button mid-game
+                event.currentTarget.blur();
+              }}
+            >
+              {aiEnabled ? '■ AI PILOT ENGAGED' : `▶ AI PILOT  (${toggleKeyLabel})`}
+            </button>
+            {aiEnabled && <AiReadout />}
+          </div>
 
-      <MiniMap />
+          <MiniMap />
+        </>
+      )}
     </>
   );
 }

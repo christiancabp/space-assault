@@ -15,6 +15,7 @@ import { Game } from './game/Game';
 import { CanvasErrorBoundary } from './ui/CanvasErrorBoundary';
 import { HUD } from './ui/HUD';
 import { AiPilotController } from './ai/AiPilotController';
+import { AI_PILOT_UNLOCKED } from './ai/featureFlag';
 import { LoadingScreen } from './ui/LoadingScreen';
 import { DamageFlash } from './ui/DamageFlash';
 import { TouchControls } from './ui/TouchControls';
@@ -58,8 +59,8 @@ function App() {
         <Game />
       </CanvasErrorBoundary>
 
-      {/* AI Pilot — headless: hotkeys + self-clocked decision loop (writes aiInput) */}
-      <AiPilotController />
+      {/* AI Pilot — hidden feature: headless controller only mounts on /ai-pilot */}
+      {AI_PILOT_UNLOCKED && <AiPilotController />}
 
       {/* HTML UI Overlays - conditionally rendered based on phase */}
       {phase === 'menu' && <StartScreen />}
