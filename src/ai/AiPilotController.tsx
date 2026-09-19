@@ -14,7 +14,7 @@
  * auto-disables after too many consecutive failures.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { GAME_CONFIG } from '../config';
 import { aiInput, resetAiInput } from './aiInput';
 import { buildPilotState } from './pilotState';
@@ -31,6 +31,17 @@ function delay(ms: number): Promise<void> {
 export function AiPilotController() {
   const enabled = useAiPilotStore((state) => state.enabled);
   const phase = useGameStore((state) => state.phase);
+
+  // Reset per-game stats on a fresh start (menu/gameOver -> playing), but NOT
+  // when resuming from pause.
+  const prevPhaseRef = useRef(phase);
+  useEffect(() => {
+    const prev = prevPhaseRef.current;
+    prevPhaseRef.current = phase;
+    if (phase === 'playing' && prev !== 'paused') {
+      useAiPilotStore.getState().resetStats();
+    }
+  }, [phase]);
 
   // Hotkeys: toggle with the configured key; movement keys hand control back.
   useEffect(() => {
@@ -64,6 +75,7 @@ export function AiPilotController() {
 
     const cfg = GAME_CONFIG.AI_PILOT;
     const store = useAiPilotStore.getState();
+    const segStart = Date.now(); // wall-clock this engagement segment began
     let stopped = false;
     let failures = 0;
     let tickController: AbortController | null = null;
@@ -87,6 +99,7 @@ export function AiPilotController() {
           cfg.requestTimeoutMs
         );
         requests += 1;
+        store.recordRequest();
 
         try {
           store.setStatus('thinking');
@@ -100,6 +113,7 @@ export function AiPilotController() {
           aiInput.firing = frame.firing;
           if (frame.dodge) aiInput.dodge = true; // one-shot; Player consumes it
           store.setLastDecision(decision);
+          store.recordDecision();
           store.setStatus('idle');
           failures = 0;
         } catch {
@@ -136,6 +150,7 @@ export function AiPilotController() {
     return () => {
       stopped = true;
       tickController?.abort();
+      store.addEngaged(Date.now() - segStart);
       resetAiInput();
     };
   }, [enabled, phase]);

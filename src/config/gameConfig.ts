@@ -194,7 +194,8 @@ export const GAME_CONFIG = {
     gridCols: 11,                    // Enemy-tracking grid width (columns)
     gridRows: 5,                     // Enemy-tracking grid height (rows)
     requestTimeoutMs: 1000,          // Abort a decision tick that exceeds this
-    minTickIntervalMs: 300,          // Min wall-clock between requests (~3/sec) for responsive real-time aim
+    minTickIntervalMs: 500,          // Min wall-clock between requests (~2/sec). The vernier does fine aim
+                                     // every frame in code, so the model can decide target/mode less often.
     maxRequestsPerEngage: 1000,      // Runaway backstop only (~5 min at current cadence). Normal stops are
                                      // death / toggle-off / tab-hidden — NOT this cap. Lower it to add a governor.
     maxConsecutiveFailures: 5,       // Auto-disable the pilot after this many failed ticks

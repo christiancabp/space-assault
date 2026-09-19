@@ -620,6 +620,44 @@ html, body, #root {
   text-shadow: 0 0 30px rgba(255, 68, 68, 0.8);
 }
 
+/* AI pilot session stats (Game Over screen) */
+.ai-stats {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem 1.5rem;
+  width: min(90vw, 340px);
+  background: rgba(74, 158, 255, 0.08);
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.ai-stats h2 {
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.ai-stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.ai-stat-row span:first-child {
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.05em;
+}
+
+.ai-stat-row span:last-child {
+  color: var(--color-text);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(74, 158, 255, 0.5);
+}
+
 .game-over .final-score {
   font-size: 2rem;
   margin-bottom: 1rem;
