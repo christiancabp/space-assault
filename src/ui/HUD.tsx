@@ -17,6 +17,7 @@
 import { useGameStore } from '../stores/gameStore';
 import { useAiPilotStore } from '../stores/aiPilotStore';
 import { MiniMap } from './MiniMap';
+import { AiStats } from './AiStats';
 import { AI_PILOT_UNLOCKED } from '../ai/featureFlag';
 import { GAME_CONFIG } from '../config';
 
@@ -25,22 +26,34 @@ import { GAME_CONFIG } from '../config';
  * row re-renders as decisions stream in (a few times per second).
  */
 function AiReadout() {
-  const decision = useAiPilotStore((state) => state.lastDecision);
+  const log = useAiPilotStore((state) => state.decisionLog);
   const status = useAiPilotStore((state) => state.status);
 
-  if (status === 'error') {
-    return <div className="ai-readout error">SIGNAL LOST</div>;
-  }
-  if (!decision) {
-    return <div className="ai-readout">…THINKING</div>;
+  if (log.length === 0) {
+    return (
+      <div className="ai-readout-log empty">
+        {status === 'error' ? 'SIGNAL LOST' : '…THINKING'}
+      </div>
+    );
   }
 
+  // Newest first; the log scrolls (2 rows, hover expands to 5) and fades older
+  // entries out as they shift down. Clears on game reset.
   return (
-    <div className={`ai-readout mode-${decision.mode.choice}`}>
-      <span>MODE {decision.mode.choice}</span>
-      <span>X {decision.aimHorizontal.choice}</span>
-      <span>Y {decision.aimVertical.choice}</span>
-      <span>FIRE ABS</span>
+    <div
+      className="ai-readout-log"
+      title="Recent AI decisions — hover to expand, scroll for the full session"
+    >
+      {log.map((entry) => (
+        <div
+          key={entry.id}
+          className={`ai-readout-entry mode-${entry.decision.mode.choice}`}
+        >
+          <span>MODE {entry.decision.mode.choice}</span>
+          <span>X {entry.decision.aimHorizontal.choice}</span>
+          <span>Y {entry.decision.aimVertical.choice}</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -99,6 +112,7 @@ export function HUD() {
             {aiEnabled && <AiReadout />}
           </div>
 
+          <AiStats />
           <MiniMap />
         </>
       )}

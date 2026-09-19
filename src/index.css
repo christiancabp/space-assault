@@ -980,6 +980,72 @@ html, body, #root {
   color: var(--color-danger);
 }
 
+/* Scrolling decision log (top-center): 2 rows by default, hover expands to 5,
+   newest on top, older entries shift down and fade out; scroll for the session. */
+.ai-readout-log {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: min(92vw, 300px);
+  max-height: 3.1rem; /* ~2 entries */
+  overflow-y: auto;
+  padding: 1px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 158, 255, 0.5) transparent;
+  transition: max-height 0.2s ease;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+}
+
+.ai-readout-log:hover {
+  max-height: 7.6rem; /* ~5 entries */
+}
+
+.ai-readout-log.empty {
+  align-items: center;
+  justify-content: center;
+  max-height: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.6);
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.ai-readout-entry {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(74, 158, 255, 0.25);
+  border-radius: 5px;
+  padding: 0.22rem 0.5rem;
+  text-shadow: 0 0 8px rgba(74, 158, 255, 0.5);
+  animation: aiEntryIn 0.25s ease-out;
+}
+
+.ai-readout-entry.mode-evade {
+  border-color: rgba(255, 68, 68, 0.5);
+  color: #ffd0d0;
+  text-shadow: 0 0 8px rgba(255, 68, 68, 0.6);
+}
+
+@keyframes aiEntryIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-readout-entry { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-toggle.active { animation: none !important; }
 }
@@ -1045,4 +1111,61 @@ html, body, #root {
 /* On phones the touch controls own the corners — hide the debug map */
 @media (pointer: coarse) {
   .mini-map-wrap { display: none; }
+}
+
+/* ── AI pilot live stats (HUD, under the score) ── */
+.ai-stats-hud {
+  position: absolute;
+  top: 72px;
+  left: 40px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.ai-stats-hud > * {
+  pointer-events: auto;
+}
+
+.ai-stats-toggle {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(74, 158, 255, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ai-stats-panel {
+  display: flex; /* rendered conditionally by AiStats (desktop always; touch via 📊) */
+  margin-top: 6px;
+  flex-direction: column;
+  gap: 1px;
+  width: 190px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(74, 158, 255, 0.35);
+  border-radius: 6px;
+}
+
+.ai-stats-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(120, 180, 255, 0.85);
+  margin-bottom: 3px;
+}
+
+.ai-stats-panel .ai-stat-row {
+  gap: 0.5rem;
+  padding: 1px 0;
+  font-size: 0.72rem;
+}
+
+/* Phones: tuck the 📊 toggle top-left, clear of the score */
+@media (max-width: 640px) {
+  .ai-stats-hud { top: 60px; left: 16px; }
 }

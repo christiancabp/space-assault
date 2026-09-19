@@ -76,6 +76,7 @@ export function AiPilotController() {
     const cfg = GAME_CONFIG.AI_PILOT;
     const store = useAiPilotStore.getState();
     const segStart = Date.now(); // wall-clock this engagement segment began
+    store.setEngageStart(segStart); // enables live engaged-time in the HUD
     let stopped = false;
     let failures = 0;
     let tickController: AbortController | null = null;
@@ -112,7 +113,7 @@ export function AiPilotController() {
           aiInput.moveY = frame.moveY;
           aiInput.firing = frame.firing;
           if (frame.dodge) aiInput.dodge = true; // one-shot; Player consumes it
-          store.setLastDecision(decision);
+          store.pushDecision(decision);
           store.recordDecision();
           store.setStatus('idle');
           failures = 0;
@@ -151,6 +152,7 @@ export function AiPilotController() {
       stopped = true;
       tickController?.abort();
       store.addEngaged(Date.now() - segStart);
+      store.setEngageStart(null);
       resetAiInput();
     };
   }, [enabled, phase]);
