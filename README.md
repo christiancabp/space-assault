@@ -53,6 +53,8 @@ Starting the game goes fullscreen on Android/iPad. On iPhone, use Safari's **Add
 
 Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. It hunts invaders, aims, and barrel-rolls to dodge — playing the game for you in real time.
 
+> 📖 **Full deep-dive** (architecture, the TypeSafe request/response and how the decision maps to the game, grid-based target lock, and how we drove accuracy from ~50% to zero escapes): **[docs/AI_PILOT.md](docs/AI_PILOT.md)**.
+
 ### How it works
 
 A small real-time control loop around Jev:

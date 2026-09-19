@@ -121,6 +121,8 @@ A LoadingScreen overlay (drei `useProgress`) covers everything until assets sett
 
 A toggleable autopilot that plays the game in real time using TypeSafe's Jev model. Off by default; press **P** (or the HUD button) during play to engage; any movement key or a second press hands control back.
 
+> **Full deep-dive (request/response, decision mapping, grid target-lock, findings): [`docs/AI_PILOT.md`](docs/AI_PILOT.md).** The summary below is the quick reference.
+
 **Hidden feature:** the pilot's UI (button, mini-map, readout) and the P hotkey only appear when the app is opened at the **`/ai-pilot`** route — gated by `AI_PILOT_UNLOCKED` in `src/ai/featureFlag.ts` (pathname ends with `/ai-pilot`). `vercel.json` has an SPA rewrite (`/((?!api/).*) → /index.html`) so that path serves the app in prod. Everywhere else the game shows no trace of it and the controller isn't even mounted (so P is inert and no requests are possible).
 
 - **Flow:** `AiPilotController` (headless, mounted in `App` *outside* the Canvas, only on `/ai-pilot`) runs a self-clocked, single-flight loop while engaged and `phase==='playing'`: `buildPilotState()` → POST `/api/pilot` → `decisionToInput()` writes the module-level `aiInput` (mirrors `touchInput`); `Player` executes `aiInput` every frame. One decision in flight at a time; the next fires when the last returns (throttled).
