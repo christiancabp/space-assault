@@ -23,10 +23,28 @@ import { usePlayerStore } from '../stores/playerStore';
 import { usePlayAreaStore } from '../stores/playAreaStore';
 import { useGameStore } from '../stores/gameStore';
 import { useAiPilotStore } from '../stores/aiPilotStore';
+import { useEnemyStore } from '../stores/enemyStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
 import { GAME_CONFIG } from '../config';
 import { ShipModel } from '../ships';
 import { playSfx } from '../audio/soundManager';
+
+/**
+ * The most-urgent invader for the AI vernier: the one closest to the player
+ * plane (highest z). Matches "highest imminence" in the grid the model sees.
+ */
+function mostUrgentEnemy(): { x: number; y: number } | null {
+  const enemies = useEnemyStore.getState().enemies;
+  let best: { x: number; y: number } | null = null;
+  let bestZ = -Infinity;
+  for (const e of enemies) {
+    if (e.position.z > bestZ) {
+      bestZ = e.position.z;
+      best = { x: e.position.x, y: e.position.y };
+    }
+  }
+  return best;
+}
 
 export function Player() {
   // Ref to the group for direct position updates
@@ -107,6 +125,21 @@ export function Player() {
         setBarrelRolling(true);
       }
       aiInput.dodge = false; // consume the one-shot regardless
+
+      // Fine-align vernier: within range of the most-urgent invader, steer to its
+      // EXACT x/y with proportional (decelerating) control so the constant fire
+      // actually lands. Far away, the model's coarse direction (above) still drives.
+      if (!barrelRoll.current.active) {
+        const target = mostUrgentEnemy();
+        if (target) {
+          const dx = target.x - groupRef.current.position.x;
+          const dy = target.y - groupRef.current.position.y;
+          if (Math.hypot(dx, dy) < GAME_CONFIG.AI_PILOT.vernierRange) {
+            inputX = THREE.MathUtils.clamp(dx / GAME_CONFIG.AI_PILOT.vernierGain, -1, 1);
+            inputY = THREE.MathUtils.clamp(dy / GAME_CONFIG.AI_PILOT.vernierGain, -1, 1);
+          }
+        }
+      }
     } else {
       // Horizontal input: keyboard, or joystick deflected past the digital
       // threshold (lets the existing double-tap logic also catch double-flicks)
