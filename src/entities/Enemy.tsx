@@ -17,6 +17,7 @@ import type { Enemy as EnemyType } from '../types/game.types';
 import { useEnemyStore } from '../stores/enemyStore';
 import { useGameStore } from '../stores/gameStore';
 import { InvaderModel } from '../invaders/InvaderModel';
+import { traceEnemy } from '../ai/trace';
 import { GAME_CONFIG } from '../config';
 
 interface EnemyProps {
@@ -88,8 +89,15 @@ export function Enemy({ enemy }: EnemyProps) {
       updateEnemy(enemy.id, { phase: 'attacking' });
     }
 
-    // Remove when past player
+    // Remove when past player — this is an ESCAPE: it wasn't shot (bullets kill in
+    // collisionSystem) or collided; it leaked past the ship. Award the enemy.
     if (meshRef.current.position.z > DESPAWN_Z) {
+      useGameStore.getState().enemyEscaped();
+      traceEnemy('escape', {
+        id: enemy.id,
+        x: Math.round(meshRef.current.position.x * 100) / 100,
+        y: Math.round(meshRef.current.position.y * 100) / 100,
+      });
       removeEnemy(enemy.id);
     }
   });

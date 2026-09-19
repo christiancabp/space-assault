@@ -76,6 +76,20 @@ html, body, #root {
   text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
 }
 
+.hud-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* Enemy (escape) score — the invaders' running total, our AI KPI */
+.hud .enemy-score {
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 120, 120, 0.9);
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+}
+
 /* Menu overlay - centered */
 .menu-overlay {
   position: absolute;

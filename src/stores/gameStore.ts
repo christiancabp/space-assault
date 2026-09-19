@@ -19,6 +19,7 @@ interface GameState {
   phase: GamePhase;
   score: number;
   lives: number;
+  enemyScore: number; // Points the invaders earn — +10 each time one escapes past the ship
 
   // Actions
   startGame: () => void;
@@ -28,6 +29,7 @@ interface GameState {
   openShipSelect: () => void;
   closeShipSelect: () => void;
   addScore: (points: number) => void;
+  enemyEscaped: () => void;
   loseLife: () => void;
   resetGame: () => void;
 }
@@ -37,6 +39,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   phase: 'menu',
   score: 0,
   lives: GAME_CONFIG.PLAYER_START_LIVES,
+  enemyScore: 0,
 
   // Start a new game
   startGame: () => {
@@ -44,6 +47,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       phase: 'playing',
       score: 0,
       lives: GAME_CONFIG.PLAYER_START_LIVES,
+      enemyScore: 0,
     });
   },
 
@@ -81,6 +85,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((state) => ({ score: state.score + points }));
   },
 
+  // An invader escaped past the ship — award the enemy 10 points
+  enemyEscaped: () => {
+    set((state) => ({ enemyScore: state.enemyScore + 10 }));
+  },
+
   // Lose a life - triggers game over if no lives left
   loseLife: () => {
     const currentLives = get().lives;
@@ -98,6 +107,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       phase: 'menu',
       score: 0,
       lives: GAME_CONFIG.PLAYER_START_LIVES,
+      enemyScore: 0,
     });
   },
 }));

@@ -47,11 +47,13 @@ export function HUD() {
   // Subscribe only to the values we display
   const score = useGameStore((state) => state.score);
   const lives = useGameStore((state) => state.lives);
+  const enemyScore = useGameStore((state) => state.enemyScore);
   const aiEnabled = useAiPilotStore((state) => state.enabled);
   const toggleAi = useAiPilotStore((state) => state.toggle);
 
-  // Format score with leading zeros (e.g., "000100")
+  // Format scores with leading zeros (e.g., "000100")
   const formattedScore = score.toString().padStart(6, '0');
+  const formattedEnemyScore = enemyScore.toString().padStart(6, '0');
 
   // Display lives as diamond symbols
   const livesDisplay = '◆'.repeat(lives);
@@ -62,11 +64,16 @@ export function HUD() {
   return (
     <>
       <div className="hud">
-        <div className="score">
-          SCORE:{' '}
-          <span key={score} className="score-value">
-            {formattedScore}
-          </span>
+        <div className="hud-left">
+          <div className="score">
+            SCORE:{' '}
+            <span key={score} className="score-value">
+              {formattedScore}
+            </span>
+          </div>
+          <div className="enemy-score" title="Invaders that escaped past the ship (×10)">
+            ENEMY: {formattedEnemyScore}
+          </div>
         </div>
         <div className={`lives${lives === 1 ? ' danger' : ''}`}>
           LIVES: {livesDisplay}

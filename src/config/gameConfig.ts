@@ -195,6 +195,7 @@ export const GAME_CONFIG = {
     maxRequestsPerEngage: 40,        // Safety cap: auto-disengage after this many requests per engagement (~12s)
     maxConsecutiveFailures: 5,       // Auto-disable the pilot after this many failed ticks
     failureBackoffMs: 300,           // Extra wait after a failed tick before retrying
+    trace: true,                     // TEMP: log enemy spawn/kill/escape events to the console for study
   },
 } as const;
 

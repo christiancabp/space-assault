@@ -19,6 +19,7 @@ import { playSfx } from '../audio/soundManager';
 import { GAME_CONFIG } from '../config';
 import { getShipConfig } from '../config';
 import { getInvaderConfig } from '../config/enemyConfigs';
+import { traceEnemy } from '../ai/trace';
 
 // Hitbox definition for collision checks
 interface Hitbox {
@@ -117,6 +118,7 @@ export function checkCollisions(): void {
 
         // Add score
         addScore(GAME_CONFIG.POINTS_PER_ENEMY);
+        traceEnemy('kill', { id: enemy.id });
 
         // Feedback: particle burst in the invader's color, "+100" floater,
         // small screen kick, explosion sound

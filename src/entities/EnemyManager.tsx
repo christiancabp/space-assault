@@ -15,6 +15,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEnemyStore, createEnemy } from '../stores/enemyStore';
 import { useGameStore } from '../stores/gameStore';
 import { Enemy } from './Enemy';
+import { traceEnemy } from '../ai/trace';
 import { GAME_CONFIG } from '../config';
 
 export function EnemyManager() {
@@ -44,6 +45,12 @@ export function EnemyManager() {
       // Create and add new enemy
       const newEnemy = createEnemy(id);
       addEnemy(newEnemy);
+      traceEnemy('spawn', {
+        id,
+        x: Math.round(newEnemy.position.x * 100) / 100,
+        y: Math.round(newEnemy.position.y * 100) / 100,
+        type: newEnemy.invaderType,
+      });
 
       lastSpawnTime.current = now;
     }
