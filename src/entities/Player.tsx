@@ -29,23 +29,6 @@ import { GAME_CONFIG } from '../config';
 import { ShipModel } from '../ships';
 import { playSfx } from '../audio/soundManager';
 
-/**
- * The most-urgent invader for the AI vernier: the one closest to the player
- * plane (highest z). Matches "highest imminence" in the grid the model sees.
- */
-function mostUrgentEnemy(): { x: number; y: number } | null {
-  const enemies = useEnemyStore.getState().enemies;
-  let best: { x: number; y: number } | null = null;
-  let bestZ = -Infinity;
-  for (const e of enemies) {
-    if (e.position.z > bestZ) {
-      bestZ = e.position.z;
-      best = { x: e.position.x, y: e.position.y };
-    }
-  }
-  return best;
-}
-
 export function Player() {
   // Ref to the group for direct position updates
   const groupRef = useRef<THREE.Group>(null);
@@ -67,6 +50,10 @@ export function Player() {
   const prevTouchLeft = useRef(false);
   const prevTouchRight = useRef(false);
   const barrelRoll = useRef({ active: false, direction: 0, startTime: 0, startX: 0 });
+
+  // AI vernier target lock: the invader id the pilot is committing to, so it
+  // doesn't flip-flop between similar-distance targets (drifting through center).
+  const lockedTargetId = useRef<string | null>(null);
 
   // Store state and actions
   const setPosition = usePlayerStore((state) => state.setPosition);
@@ -126,17 +113,44 @@ export function Player() {
       }
       aiInput.dodge = false; // consume the one-shot regardless
 
-      // Fine-align vernier: within range of the most-urgent invader, steer to its
-      // EXACT x/y with proportional (decelerating) control so the constant fire
-      // actually lands. Far away, the model's coarse direction (above) still drives.
+      // Fine-align vernier with TARGET LOCK. Commit to one invader (by id) until
+      // it's destroyed instead of re-picking the closest every frame — otherwise
+      // two similar-distance invaders make the ship flip-flop through the middle.
+      // Within range, steer to the locked invader's exact x/y (proportional) and
+      // HOLD (do nothing) once inside the deadzone. With no invaders, hold too.
       if (!barrelRoll.current.active) {
-        const target = mostUrgentEnemy();
-        if (target) {
-          const dx = target.x - groupRef.current.position.x;
-          const dy = target.y - groupRef.current.position.y;
-          if (Math.hypot(dx, dy) < GAME_CONFIG.AI_PILOT.vernierRange) {
-            inputX = THREE.MathUtils.clamp(dx / GAME_CONFIG.AI_PILOT.vernierGain, -1, 1);
-            inputY = THREE.MathUtils.clamp(dy / GAME_CONFIG.AI_PILOT.vernierGain, -1, 1);
+        const { vernierRange, vernierGain, holdDeadzone } = GAME_CONFIG.AI_PILOT;
+        const enemies = useEnemyStore.getState().enemies;
+
+        if (enemies.length === 0) {
+          // Nothing to chase — stay put rather than coast on a stale decision.
+          inputX = 0;
+          inputY = 0;
+          lockedTargetId.current = null;
+        } else {
+          let target =
+            lockedTargetId.current !== null
+              ? enemies.find((e) => e.id === lockedTargetId.current)
+              : undefined;
+          if (!target) {
+            // Lock the most urgent invader (closest to the player plane).
+            target = enemies.reduce((best, e) =>
+              e.position.z > best.position.z ? e : best
+            );
+            lockedTargetId.current = target.id;
+          }
+
+          const dx = target.position.x - groupRef.current.position.x;
+          const dy = target.position.y - groupRef.current.position.y;
+          if (Math.hypot(dx, dy) < vernierRange) {
+            inputX =
+              Math.abs(dx) < holdDeadzone
+                ? 0
+                : THREE.MathUtils.clamp(dx / vernierGain, -1, 1);
+            inputY =
+              Math.abs(dy) < holdDeadzone
+                ? 0
+                : THREE.MathUtils.clamp(dy / vernierGain, -1, 1);
           }
         }
       }

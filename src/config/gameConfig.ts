@@ -189,6 +189,7 @@ export const GAME_CONFIG = {
     aiSpeedScale: 0.5,               // Ship moves at this fraction of PLAYER_SPEED under AI (finer aim, less overshoot)
     vernierRange: 4,                 // Within this 2D distance to the target, code fine-steers to its exact x/y
     vernierGain: 2,                  // Proportional gain for the vernier (smaller = snappier, larger = gentler)
+    holdDeadzone: 0.5,               // Once within this of the target's x/y, HOLD (do nothing) — no jitter/overshoot
     moveConfidence: 0.55,            // aim Choice below this confidence => hold (center)
     evadeConfidence: 0.6,            // mode=evade below this confidence => stay attacking
     gridCols: 11,                    // Enemy-tracking grid width (columns)
