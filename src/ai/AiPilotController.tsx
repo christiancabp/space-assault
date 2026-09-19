@@ -79,6 +79,7 @@ export function AiPilotController() {
         }
 
         const tickStart = Date.now();
+        let failedThisTick = false;
         const state = buildPilotState();
         tickController = new AbortController();
         const timer = setTimeout(
@@ -105,6 +106,7 @@ export function AiPilotController() {
           clearTimeout(timer);
           if (stopped) break;
           failures += 1;
+          failedThisTick = true;
           store.setStatus('error');
           if (failures >= cfg.maxConsecutiveFailures) {
             store.setEnabled(false); // flips `enabled` → effect cleanup resets input
@@ -118,14 +120,14 @@ export function AiPilotController() {
           break;
         }
 
-        // Throttle: keep a minimum gap between request starts to protect the
-        // API budget (this floor also serves as the post-failure backoff).
+        // Throttle: keep a minimum gap between request starts. On success this is
+        // just minTickIntervalMs; a failed tick additionally waits failureBackoffMs.
         const elapsed = Date.now() - tickStart;
         const wait = Math.max(
-          cfg.failureBackoffMs,
+          failedThisTick ? cfg.failureBackoffMs : 0,
           cfg.minTickIntervalMs - elapsed
         );
-        await delay(wait);
+        if (wait > 0) await delay(wait);
       }
     };
 

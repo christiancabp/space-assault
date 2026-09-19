@@ -49,7 +49,7 @@ Starting the game goes fullscreen on Android/iPad. On iPhone, use Safari's **Add
 
 ## AI Pilot (TypeSafe)
 
-Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. A few times per second it sends a small 2D-plane snapshot of the playfield to a server-side endpoint, which asks Jev four typed questions (attack vs. evade, horizontal aim, vertical aim, fire) and returns a decision the ship executes every frame. The HUD shows the live decision.
+Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an AI pilot powered by [TypeSafe](https://typesafe.ai)'s Jev model. A few times per second it sends a small 2D-plane snapshot of the playfield to a server-side endpoint, which asks Jev three typed questions (attack vs. evade, horizontal aim, vertical aim) and returns a decision the ship executes every frame. Firing is always-on while engaged (ABS — "always be shooting", like holding the fire button). The HUD shows the live decision.
 
 ### Run it locally
 

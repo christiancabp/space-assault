@@ -18,10 +18,6 @@ import { useGameStore } from '../stores/gameStore';
 import { useAiPilotStore } from '../stores/aiPilotStore';
 import { GAME_CONFIG } from '../config';
 
-function toPercent(value: number): number {
-  return Math.round(value * 100);
-}
-
 /**
  * Live typed-judgment readout. Subscribes to lastDecision/status so only this
  * row re-renders as decisions stream in (a few times per second).
@@ -42,7 +38,7 @@ function AiReadout() {
       <span>MODE {decision.mode.choice}</span>
       <span>X {decision.aimHorizontal.choice}</span>
       <span>Y {decision.aimVertical.choice}</span>
-      <span>FIRE {toPercent(decision.fire.probability)}%</span>
+      <span>FIRE ABS</span>
     </div>
   );
 }

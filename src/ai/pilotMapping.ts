@@ -43,6 +43,9 @@ export function decisionToInput(
 ): PilotInputFrame {
   const cfg = GAME_CONFIG.AI_PILOT;
 
+  // Always-be-shooting: the ship holds the trigger the whole time it is engaged
+  // (like a human leaving Space held down), so `firing` is always true.
+
   // Evade only as a last resort, and only when the model is confident.
   if (
     decision.mode.choice === 'evade' &&
@@ -51,7 +54,7 @@ export function decisionToInput(
     return {
       moveX: computeEscapeDir(state),
       moveY: 0,
-      firing: false,
+      firing: true,
       dodge: true,
     };
   }
@@ -69,7 +72,7 @@ export function decisionToInput(
   return {
     moveX,
     moveY,
-    firing: decision.fire.probability > cfg.fireThreshold,
+    firing: true,
     dodge: false,
   };
 }

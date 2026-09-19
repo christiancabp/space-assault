@@ -34,6 +34,4 @@ export interface PilotDecision {
   mode: { choice: PilotMode; confidence: number };
   aimHorizontal: { choice: HorizontalMove; confidence: number };
   aimVertical: { choice: VerticalMove; confidence: number };
-  /** Noul probability that firing now would hit an invader (no confidence field). */
-  fire: { probability: number };
 }

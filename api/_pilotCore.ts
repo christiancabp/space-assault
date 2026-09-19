@@ -10,14 +10,13 @@
  */
 
 import type { EntryType } from '@typesafe-ai/sdk';
-import { choice, noul, TypeSafeClient, APIError } from '@typesafe-ai/sdk';
+import { choice, TypeSafeClient, APIError } from '@typesafe-ai/sdk';
 
 /** Normalized decision returned to the browser (mirrors src/ai/types.ts PilotDecision). */
 export interface PilotDecisionResult {
   mode: { choice: string; confidence: number };
   aimHorizontal: { choice: string; confidence: number };
   aimVertical: { choice: string; confidence: number };
-  fire: { probability: number };
 }
 
 // The four judgments, asked in parallel over the same state (one ~100ms request).
@@ -45,9 +44,8 @@ const questions = {
       down: "The nearest invader's y is less than the ship's y (it is below).",
     }
   ),
-  fire: noul(
-    "Is an invader lined up close to directly ahead of the ship right now, so firing would hit it? This is true only when the ship and an invader share nearly the same x and y."
-  ),
+  // NOTE: no "fire" question — the pilot is always-be-shooting (holds the
+  // trigger down the whole time it is engaged), so firing is decided in code.
 };
 
 // One client reused across warm invocations. When apiKey is omitted the SDK
@@ -90,7 +88,6 @@ export async function decidePilot(
       choice: answers.aim_vertical.choice,
       confidence: answers.aim_vertical.confidence,
     },
-    fire: { probability: answers.fire.noul },
   };
 }
 

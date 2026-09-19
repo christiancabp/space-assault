@@ -163,9 +163,10 @@ export function Player() {
     // Update previous keys for next frame
     prevKeysRef.current = new Set(keys);
 
-    // Calculate movement from input
-    const moveX = inputX * PLAYER_SPEED * delta;
-    const moveY = inputY * PLAYER_SPEED * delta;
+    // Calculate movement from input (AI moves slower for finer aim / less overshoot)
+    const speed = aiOn ? PLAYER_SPEED * GAME_CONFIG.AI_PILOT.aiSpeedScale : PLAYER_SPEED;
+    const moveX = inputX * speed * delta;
+    const moveY = inputY * speed * delta;
 
     // Apply movement with bounds clamping
     const newX = THREE.MathUtils.clamp(
