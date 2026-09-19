@@ -14,6 +14,7 @@ export function traceEnemy(
   event: EnemyEventType,
   info: Record<string, unknown>
 ): void {
-  if (!GAME_CONFIG.AI_PILOT.trace) return;
+  // Dev only — never spam a production visitor's console.
+  if (!import.meta.env.DEV || !GAME_CONFIG.AI_PILOT.trace) return;
   console.info(`[enemy:${event}]`, info);
 }

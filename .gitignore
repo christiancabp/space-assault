@@ -17,6 +17,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Local scratch (screen recordings, etc.) — not part of the app
+/temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
