@@ -175,6 +175,27 @@ export const GAME_CONFIG = {
     luminanceSmoothing: 0.25,
     mipmapBlur: true,
   },
+
+  // ============================================
+  // AI PILOT (TypeSafe / Jev autopilot)
+  // ============================================
+  // A toggleable autopilot that plays the game in real time. Each "tick" a
+  // compact 2D-plane snapshot is sent to the /api/pilot serverless proxy, which
+  // asks Jev four parallel questions; the returned decision is executed every
+  // frame until the next one arrives. See docs/superpowers/specs/.
+  AI_PILOT: {
+    toggleKey: 'KeyP',               // Keyboard toggle for the autopilot
+    endpoint: '/api/pilot',          // Same-origin serverless proxy
+    fireThreshold: 0.5,              // fire probability above this holds the trigger
+    moveConfidence: 0.55,            // aim Choice below this confidence => hold (center)
+    evadeConfidence: 0.6,            // mode=evade below this confidence => stay attacking
+    maxInvaders: 6,                  // Cap invaders sent in the state snapshot
+    requestTimeoutMs: 1000,          // Abort a decision tick that exceeds this
+    minTickIntervalMs: 1500,         // Min wall-clock between requests — throttle to protect the API budget
+    maxRequestsPerEngage: 20,        // Safety cap: auto-disengage after this many requests per engagement
+    maxConsecutiveFailures: 5,       // Auto-disable the pilot after this many failed ticks
+    failureBackoffMs: 300,           // Wait at least this long between ticks (post-failure backoff floor)
+  },
 } as const;
 
 // Type helper for accessing config
