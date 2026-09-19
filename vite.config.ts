@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-import { decidePilot } from './api/_pilotCore'
+import { decidePilot } from './api/pilot'
 
 /**
  * Dev-only: serve POST /api/pilot from the Vite dev server so the AI pilot works
