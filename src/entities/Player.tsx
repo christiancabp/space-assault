@@ -18,9 +18,11 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useKeyboard } from '../hooks/useKeyboard';
 import { touchInput } from '../input/touchInput';
+import { aiInput } from '../ai/aiInput';
 import { usePlayerStore } from '../stores/playerStore';
 import { usePlayAreaStore } from '../stores/playAreaStore';
 import { useGameStore } from '../stores/gameStore';
+import { useAiPilotStore } from '../stores/aiPilotStore';
 import { useBulletStore, createPlayerBullet } from '../stores/bulletStore';
 import { GAME_CONFIG } from '../config';
 import { ShipModel } from '../ships';
@@ -79,56 +81,82 @@ export function Player() {
     const prevKeys = prevKeysRef.current;
     const now = state.clock.elapsedTime * 1000; // ms
 
-    // Calculate input direction (-1..1 for each axis, keyboard + touch)
+    // Calculate input direction (-1..1 for each axis)
     let inputX = 0;
     let inputY = 0;
+    let wantFire = false;
 
-    // Horizontal input: keyboard, or joystick deflected past the digital
-    // threshold (lets the existing double-tap logic also catch double-flicks)
-    const leftPressed =
-      keys.has('KeyA') || keys.has('ArrowLeft') || touchInput.moveX < -0.6;
-    const rightPressed =
-      keys.has('KeyD') || keys.has('ArrowRight') || touchInput.moveX > 0.6;
-    const wasLeftPressed = prevKeys.has('KeyA') || prevKeys.has('ArrowLeft') || prevTouchLeft.current;
-    const wasRightPressed = prevKeys.has('KeyD') || prevKeys.has('ArrowRight') || prevTouchRight.current;
-    prevTouchLeft.current = touchInput.moveX < -0.6;
-    prevTouchRight.current = touchInput.moveX > 0.6;
+    // Input source: the AI pilot when engaged, otherwise keyboard + touch.
+    const aiOn = useAiPilotStore.getState().enabled;
 
-    if (keys.has('KeyA') || keys.has('ArrowLeft')) inputX -= 1;
-    if (keys.has('KeyD') || keys.has('ArrowRight')) inputX += 1;
+    if (aiOn) {
+      // Autopilot drives movement and fire; the barrel-roll dodge is a one-shot.
+      inputX = THREE.MathUtils.clamp(aiInput.moveX, -1, 1);
+      inputY = THREE.MathUtils.clamp(aiInput.moveY, -1, 1);
+      wantFire = aiInput.firing;
 
-    // Vertical input (W/S or Up/Down arrows)
-    if (keys.has('KeyW') || keys.has('ArrowUp')) {
-      inputY += 1;
-    }
-    if (keys.has('KeyS') || keys.has('ArrowDown')) {
-      inputY -= 1;
-    }
-
-    // Merge analog joystick input
-    inputX = THREE.MathUtils.clamp(inputX + touchInput.moveX, -1, 1);
-    inputY = THREE.MathUtils.clamp(inputY + touchInput.moveY, -1, 1);
-
-    // Double-tap detection for barrel roll
-    if (!barrelRoll.current.active) {
-      const currentX = groupRef.current.position.x;
-      // Detect new left press
-      if (leftPressed && !wasLeftPressed) {
-        if (now - lastLeftPress.current < BARREL_ROLL.doubleTapThreshold) {
-          // Trigger barrel roll left (direction 1 = roll left, shift left = negative X)
-          barrelRoll.current = { active: true, direction: 1, startTime: now, startX: currentX };
-          setBarrelRolling(true);
-        }
-        lastLeftPress.current = now;
+      if (aiInput.dodge && !barrelRoll.current.active) {
+        // Roll toward the escape direction (moveX): left/neutral rolls left.
+        const direction = aiInput.moveX > 0 ? -1 : 1;
+        barrelRoll.current = {
+          active: true,
+          direction,
+          startTime: now,
+          startX: groupRef.current.position.x,
+        };
+        setBarrelRolling(true);
       }
-      // Detect new right press
-      if (rightPressed && !wasRightPressed) {
-        if (now - lastRightPress.current < BARREL_ROLL.doubleTapThreshold) {
-          // Trigger barrel roll right (direction -1 = roll right, shift right = positive X)
-          barrelRoll.current = { active: true, direction: -1, startTime: now, startX: currentX };
-          setBarrelRolling(true);
+      aiInput.dodge = false; // consume the one-shot regardless
+    } else {
+      // Horizontal input: keyboard, or joystick deflected past the digital
+      // threshold (lets the existing double-tap logic also catch double-flicks)
+      const leftPressed =
+        keys.has('KeyA') || keys.has('ArrowLeft') || touchInput.moveX < -0.6;
+      const rightPressed =
+        keys.has('KeyD') || keys.has('ArrowRight') || touchInput.moveX > 0.6;
+      const wasLeftPressed = prevKeys.has('KeyA') || prevKeys.has('ArrowLeft') || prevTouchLeft.current;
+      const wasRightPressed = prevKeys.has('KeyD') || prevKeys.has('ArrowRight') || prevTouchRight.current;
+      prevTouchLeft.current = touchInput.moveX < -0.6;
+      prevTouchRight.current = touchInput.moveX > 0.6;
+
+      if (keys.has('KeyA') || keys.has('ArrowLeft')) inputX -= 1;
+      if (keys.has('KeyD') || keys.has('ArrowRight')) inputX += 1;
+
+      // Vertical input (W/S or Up/Down arrows)
+      if (keys.has('KeyW') || keys.has('ArrowUp')) {
+        inputY += 1;
+      }
+      if (keys.has('KeyS') || keys.has('ArrowDown')) {
+        inputY -= 1;
+      }
+
+      // Merge analog joystick input
+      inputX = THREE.MathUtils.clamp(inputX + touchInput.moveX, -1, 1);
+      inputY = THREE.MathUtils.clamp(inputY + touchInput.moveY, -1, 1);
+
+      wantFire = keys.has('Space') || touchInput.firing;
+
+      // Double-tap detection for barrel roll
+      if (!barrelRoll.current.active) {
+        const currentX = groupRef.current.position.x;
+        // Detect new left press
+        if (leftPressed && !wasLeftPressed) {
+          if (now - lastLeftPress.current < BARREL_ROLL.doubleTapThreshold) {
+            // Trigger barrel roll left (direction 1 = roll left, shift left = negative X)
+            barrelRoll.current = { active: true, direction: 1, startTime: now, startX: currentX };
+            setBarrelRolling(true);
+          }
+          lastLeftPress.current = now;
         }
-        lastRightPress.current = now;
+        // Detect new right press
+        if (rightPressed && !wasRightPressed) {
+          if (now - lastRightPress.current < BARREL_ROLL.doubleTapThreshold) {
+            // Trigger barrel roll right (direction -1 = roll right, shift right = positive X)
+            barrelRoll.current = { active: true, direction: -1, startTime: now, startX: currentX };
+            setBarrelRolling(true);
+          }
+          lastRightPress.current = now;
+        }
       }
     }
 
@@ -201,9 +229,8 @@ export function Player() {
     // Sync position to store for collision detection
     setPosition({ x: finalX, y: newY });
 
-    // Shooting (Space key or touch fire button)
-    if (keys.has('Space') || touchInput.firing) {
-      const now = state.clock.elapsedTime * 1000; // Convert to ms
+    // Shooting (Space key, touch fire button, or AI pilot)
+    if (wantFire) {
       if (now - lastShotTime.current > GAME_CONFIG.PLAYER_FIRE_RATE) {
         // Create and add new bullet
         const bullet = createPlayerBullet({
