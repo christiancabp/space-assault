@@ -189,7 +189,8 @@ export const GAME_CONFIG = {
     aiSpeedScale: 0.5,               // Ship moves at this fraction of PLAYER_SPEED under AI (finer aim, less overshoot)
     moveConfidence: 0.55,            // aim Choice below this confidence => hold (center)
     evadeConfidence: 0.6,            // mode=evade below this confidence => stay attacking
-    maxInvaders: 6,                  // Cap invaders sent in the state snapshot
+    gridCols: 11,                    // Enemy-tracking grid width (columns)
+    gridRows: 5,                     // Enemy-tracking grid height (rows)
     requestTimeoutMs: 1000,          // Abort a decision tick that exceeds this
     minTickIntervalMs: 300,          // Min wall-clock between requests (~3/sec) for responsive real-time aim
     maxRequestsPerEngage: 40,        // Safety cap: auto-disengage after this many requests per engagement (~12s)

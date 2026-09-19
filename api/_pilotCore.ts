@@ -20,28 +20,31 @@ export interface PilotDecisionResult {
 }
 
 // The four judgments, asked in parallel over the same state (one ~100ms request).
+// State shape: { grid: number[][], dims: {cols,rows}, ship: {col,row} }.
+// `grid` is rows from top (0) to bottom; each number is an enemy's imminence
+// (0 = empty, 9 = about to reach and pass the ship). Only the ship moves.
 const questions = {
   mode: choice(
-    'Should the ship press the attack or evade? The ship fires forward and the ONLY danger is an invader colliding with it. Choose "evade" ONLY as a last resort: when a diving invader is very close to the ship in both x and y and its z has nearly reached the ship. Otherwise choose "attack".',
+    'You pilot a ship on a 2D grid. In `grid`, each number is an enemy\'s imminence (9 = about to reach and get PAST the ship; 0 = empty). `ship` is your cell {col,row}. Should you attack or evade? Choose "evade" ONLY as a last resort — when an enemy with imminence 8 or 9 sits in the ship\'s own column (same col), about to collide. Otherwise choose "attack".',
     {
-      attack: 'Safe enough to hunt — no invader is about to collide with the ship.',
-      evade: 'A collision is imminent — a diving invader is nearly on top of the ship.',
+      attack: 'No enemy is about to collide — keep hunting the invaders.',
+      evade: 'An enemy is about to reach the ship in its column — dodge now.',
     }
   ),
   aim_horizontal: choice(
-    "Which way should the ship move horizontally to line up a shot on the NEAREST invader (the first in the list)? Bullets travel straight ahead, so the ship's x must match the target's x. Compare ship.x to that invader's x.",
+    'Move toward the most urgent enemy in `grid` (the highest number; if tied, the one nearest the ship). Compare that enemy\'s column to ship.col.',
     {
-      left: "The nearest invader's x is less than the ship's x (it is to the left).",
-      center: "The ship's x already matches the nearest invader's x.",
-      right: "The nearest invader's x is greater than the ship's x (it is to the right).",
+      left: "The target enemy's column is less than ship.col (it is to the left).",
+      center: 'The target enemy is in the same column as the ship.',
+      right: "The target enemy's column is greater than ship.col (it is to the right).",
     }
   ),
   aim_vertical: choice(
-    "Which way should the ship move vertically to line up with the NEAREST invader's y? Compare ship.y to that invader's y.",
+    'Move toward the most urgent enemy\'s ROW. IMPORTANT: row 0 is the TOP of the grid, so moving UP means a SMALLER row number. Compare the target enemy\'s row to ship.row.',
     {
-      up: "The nearest invader's y is greater than the ship's y (it is above).",
-      center: "The ship's y already matches the nearest invader's y.",
-      down: "The nearest invader's y is less than the ship's y (it is below).",
+      up: "The target enemy's row is less than ship.row (higher up, smaller row number).",
+      center: 'The target enemy is in the same row as the ship.',
+      down: "The target enemy's row is greater than ship.row (lower down, larger row number).",
     }
   ),
   // NOTE: no "fire" question — the pilot is always-be-shooting (holds the

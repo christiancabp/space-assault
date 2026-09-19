@@ -16,6 +16,7 @@
 
 import { useGameStore } from '../stores/gameStore';
 import { useAiPilotStore } from '../stores/aiPilotStore';
+import { MiniMap } from './MiniMap';
 import { GAME_CONFIG } from '../config';
 
 /**
@@ -93,6 +94,8 @@ export function HUD() {
         </button>
         {aiEnabled && <AiReadout />}
       </div>
+
+      <MiniMap />
     </>
   );
 }
