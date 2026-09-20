@@ -21,6 +21,12 @@ A few times a second we ask the model a small, structured question about the
 current board; it returns a typed decision; the ship executes that decision on
 every animation frame until the next one arrives.
 
+```text
+  model decision:  ●─────────500 ms─────────●─────────500 ms─────────●   (~2 / sec)
+  frames @ 60fps:  ┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊   (~30 frames each)
+                   └── the ship executes the LAST decision on every frame ──┘
+```
+
 The other key idea is the **division of labour**:
 
 | Concern | Owner | Why |
@@ -73,6 +79,16 @@ only ever does `position.z += speed * delta`). So, viewed from behind the ship,
 the playfield is a **2D board where only the ship moves** and each invader is a
 fixed cell whose *urgency* grows as it approaches.
 
+The one axis the invaders *do* travel — depth (z) — is what becomes "imminence":
+
+```text
+  spawn (far)                                                   player plane
+    z ≈ -45  ───────────  invader flies straight at you (+z)  ─────────▶  z ≈ 0
+    (x and y never change) ─────────────────────────────────────────────
+  imminence:  1 ····· 2 ····· 3 ····· 4 ····· 5 ····· 6 ····· 7 ····· 8 ····· 9
+            (far, ignore)                                    (about to pass — kill it NOW)
+```
+
 `src/ai/grid.ts` turns the live game into that board:
 
 - Bin the visible play area into `gridCols × gridRows` cells (default **11 × 5**).
@@ -88,9 +104,35 @@ fixed cell whose *urgency* grows as it approaches.
   ship: { col, row } }
 ```
 
-An LLM reads this far more reliably than a list of floating-point coordinates
-(see Findings #2). It's also exactly what the **"AI VIEW" mini-map** draws, so
-you literally see what the model sees.
+So a moment of play becomes the grid below — identical to the on-screen
+**"AI VIEW"** mini-map. `.` is empty, `1`–`9` is an invader's imminence, `▲` is you:
+
+```text
+   AI VIEW  ·  11 columns × 5 rows
+   col →    0   1   2   3   4   5   6   7   8   9  10
+          ┌──────────────────────────────────────────┐
+   row 0  │ .   .   .   .   .   .   .   .   .   .   . │  ← top
+   row 1  │ .   .   .   3   .   .   .   .   .   .   . │  a far invader (imminence 3)
+   row 2  │ .   .   .   .   .   .   9   .   .   .   . │  ← URGENT invader (9!)
+   row 3  │ .   .   .   .   ▲   .   .   .   .   .   . │  ← your ship
+   row 4  │ .   .   .   .   .   .   .   .   .   .   . │  ← bottom
+          └──────────────────────────────────────────┘
+```
+
+Colour-coded the way the mini-map paints it (green → amber → red as imminence rises):
+
+```text
+   ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛
+   ⬛⬛⬛🟩⬛⬛⬛⬛⬛⬛⬛     🟩 low  (1–4)
+   ⬛⬛⬛⬛⬛⬛🟥⬛⬛⬛⬛     🟨 mid  (5–7)
+   ⬛⬛⬛⬛🔷⬛⬛⬛⬛⬛⬛     🟥 high (8–9)
+   ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛     🔷 ship
+```
+
+That grid *is* the `state.grid` in the request (§4). An LLM reads this far more
+reliably than a list of floating-point coordinates (see Findings #2) — give it a
+*picture*, not a math problem. Here it will pick the `9` as the target to line up
+on (move right + up to reach column 6, row 2).
 
 ---
 
@@ -253,6 +295,16 @@ Three behaviours, each of which measurably improved play:
 Net: the ship locks a target, glides onto its exact column, holds, and the steady
 ABS stream destroys it — then it relocks the next one.
 
+```text
+  WITHOUT lock  (thrash)                 WITH lock + hold
+  two invaders at similar depth:         commit to one, hold, then relock:
+
+    [A]       [B]                           [A]       [B]
+       ↖     ↗    ship darts A→B→A→…            │        locks A, holds under it,
+         [▲]      through the middle            [▲]      fires a steady stream → hit,
+      miss · drift · retry                              then relocks B
+```
+
 ---
 
 ## 8. The rest of the system (brief)
@@ -282,6 +334,18 @@ How the pilot went from missing half its shots to letting *nothing* escape. Each
 step came from watching it play and translating the behaviour into code.
 
 **Kill rate over the experiment: ~50% → ~90% → ~zero escapes.**
+
+```text
+  kill rate
+   ~100% ┤                                            ▇▇▇▇▇▇▇▇▇▇  ← no escapes
+    ~90% ┤                            ▇▇▇▇▇▇▇▇▇▇       ▇▇▇▇▇▇▇▇▇▇
+    ~70% ┤                            ▇▇▇▇▇▇▇▇▇▇       ▇▇▇▇▇▇▇▇▇▇
+    ~50% ┤   ▇▇▇▇▇▇▇▇▇▇               ▇▇▇▇▇▇▇▇▇▇       ▇▇▇▇▇▇▇▇▇▇
+         └───────────────────────────────────────────────────────
+            v1: floats     +2D grid      +vernier        +target lock
+            (spray &       (model reads  (code does      (commit + hold
+             miss)          the board)    exact aim)      → nothing escapes)
+```
 
 1. **Real-time = decide-at-cadence + execute-every-frame.** A ~100 ms network
    model can't drive 60 fps directly, but it doesn't need to. Deciding a few
