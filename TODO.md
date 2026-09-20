@@ -129,4 +129,135 @@
 
 ---
 
+## Phase 5: AI Pilot (TypeSafe / Jev) - SHIPPED
+
+Real-time autopilot that plays the game via TypeSafe's Jev model. Full writeup in
+[docs/AI_PILOT.md](docs/AI_PILOT.md).
+
+- [x] Hidden behind the `/ai-pilot` route (`src/ai/featureFlag.ts` + `vercel.json` SPA rewrite)
+- [x] 2D "matrix" grid state (`src/ai/grid.ts`, 11×5, imminence 1-9) + live "AI VIEW" mini-map
+- [x] Self-clocked decision loop, single request in flight (`src/ai/AiPilotController.tsx`)
+- [x] Three parallel Choice questions - `mode` / `aim_horizontal` / `aim_vertical` (`api/pilot.ts`)
+- [x] Self-contained serverless proxy via native `fetch` (no SDK); Vite dev middleware reuses `decidePilot`
+- [x] Always-be-shooting (fire in code, not a model question)
+- [x] Fine-align vernier + **target lock** + hold deadzone (`src/entities/Player.tsx`) → ~90%+, near-zero escapes
+- [x] Evade = invincible barrel-roll dodge (i-frames through the collision)
+- [x] Live HUD: stats panel (desktop / 📊 on mobile), scrolling decision log, ENEMY escape KPI
+- [x] Game Over session stats; per-game reset
+- [x] Budget guards: off by default, ~2/sec throttle, runaway cap, auto-disable on repeated failures
+
+## AI Pilot - Future Improvements
+
+Ideas for cutting API cost, sharpening accuracy, and hardening the loop. Not yet
+built. Effort = S/M/L. "Speculative" = unproven, worth a spike first.
+
+**Quick wins (do these first):**
+
+- [ ] Trim the request payload (S)
+- [ ] Skip the model in steady-state / event-driven cadence (M) - biggest cost lever
+- [ ] Break lock on an imminent escape (S-M) - biggest remaining accuracy gap
+- [ ] Pure-code fallback pilot when the API is down/slow (M) - reliability
+
+### API cost (fewer / cheaper requests)
+
+- [ ] **Event-driven / adaptive cadence.** Only call the model when the board
+      *meaningfully* changes (new spawn, locked target destroyed, lock broken,
+      mode should flip), instead of the fixed `minTickIntervalMs` (~2/sec) timer;
+      otherwise hold the last decision. _Why:_ steady-state aiming is already all
+      code (vernier/lock) - the model rarely needs to re-decide. Could cut
+      requests by a large factor. _Effort:_ M. _Trade-off:_ must define "changed"
+      well or it gets sluggish reacting to fast dives.
+- [ ] **Skip the model when code is confident.** The lock + vernier fully handle
+      "keep hunting the locked target." Only consult Jev to (a) choose a *new*
+      target after a kill, or (b) decide attack↔evade. Between those, don't call.
+      _Why:_ collapses most ticks to zero requests. _Effort:_ M. _Trade-off:_ the
+      readout/decision-log updates less often (they'd tick only on real decisions).
+- [ ] **Shrink input tokens (~1050 in/req today).** Shorten the `instructions`/
+      `criteria` strings in `api/pilot.ts`; cap how many invaders the grid encodes
+      (only the top few by imminence); consider a coarser grid when the board is
+      sparse. _Effort:_ S. _Trade-off:_ over-trimming instructions can hurt the
+      model's spatial reasoning - re-measure kill rate after.
+- [ ] **Drop unused response fields.** We only read `choice` + `confidence`;
+      `probabilities` is ignored. If the API supports omitting it, do so.
+      _Effort:_ S. _Trade-off:_ none if supported; otherwise no-op.
+- [ ] **Dedupe identical consecutive grids.** If this tick's grid == last tick's,
+      reuse the last decision instead of re-requesting. _Effort:_ S. _Trade-off:_
+      grids rarely repeat exactly while enemies advance in z; pairs well with a
+      coarser grid or event-driven cadence.
+- [ ] **One combined question vs three (measure).** Try a single richer question
+      returning mode+direction vs the current three parallel Choices. _Effort:_ S
+      to try. _Trade-off:_ Speculative - parallel Choices are already one request;
+      may not help tokens/latency. Measure before committing.
+- [ ] **Back off harder when safe.** When no invader is within N cells, widen the
+      interval further (or pause requests). _Effort:_ S. Overlaps with
+      event-driven cadence.
+
+### Accuracy / play quality
+
+- [ ] **Break lock on imminent escape.** If a *different* invader reaches
+      imminence 9 (about to leak past) while locked on a lower-priority target,
+      switch to it. _Why:_ the one weakness of target-lock is over-committing while
+      another slips by - this closes the last escapes. _Effort:_ S-M (code-only, in
+      `Player.tsx`'s lock logic). _Trade-off:_ too-eager switching reintroduces
+      thrash; only break for a genuinely-escaping higher-urgency target.
+- [ ] **Smarter target prioritization.** Rank threats by `imminence + column
+      distance` (cheap to reach + about to escape) instead of pure max-z. Or use
+      TypeSafe's **Score** primitive to rank per-invader threat. _Effort:_ M
+      (code heuristic) / L (Score). _Trade-off:_ Score adds request cost; a code
+      heuristic is free - try that first.
+- [ ] **Independent evade safety-net.** A pure-code proximity check (or a **Noul**
+      "is a collision imminent?") that can trigger the barrel-roll dodge even if
+      the `mode` Choice says attack. _Why:_ decouples "don't die" from the model's
+      strategic call; more robust. _Effort:_ S (code) / M (Noul). _Trade-off:_ Noul
+      adds a question; code check is free and deterministic - prefer it.
+- [ ] **Boss-invader handling.** If bosses have more health/bigger hitboxes, keep
+      the lock longer and confirm the kill before relocking. _Effort:_ S-M.
+- [ ] **Do NOT build predictive/lead aim.** Enemies never change x/y (only z), so
+      there's nothing to lead - the target's column is fixed. Noted here so nobody
+      spends time on it.
+- [ ] **A/B question-wording harness.** The instructions/criteria are the main
+      behavior lever; make it easy to swap wordings and compare kill/escape rates
+      over N runs. _Effort:_ M. Pairs with the eval harness below.
+
+### Performance / reliability
+
+- [ ] **Pure-code fallback pilot.** If `/api/pilot` is unavailable or slow, keep
+      flying with a code-only policy (lock nearest by z + vernier + ABS; dodge on
+      proximity). _Why:_ the game stays fun/playable with zero model calls; also a
+      useful baseline (see below). _Effort:_ M. _Trade-off:_ loses the "AI decides"
+      framing while degraded - show a HUD note.
+- [ ] **Reduce HUD churn.** `AiStats` recomputes on a 250ms timer and the decision
+      log re-renders per decision; consider refs/`useSyncExternalStore` selectors
+      or a canvas mini-map if profiling shows cost. _Effort:_ S-M. _Trade-off:_
+      likely negligible today - measure first, don't pre-optimize.
+- [ ] **Tune timeouts + retry/backoff.** `requestTimeoutMs` (1000) vs the server
+      `fetch` timeout (5000) aren't aligned; add explicit 429/5xx backoff in
+      `pilotClient`/`api`. _Effort:_ S. _Trade-off:_ none.
+- [ ] **Remove/keep the `trace` flag intentionally.** `AI_PILOT.trace` is dev-only
+      (gated by `import.meta.env.DEV`) but still labeled TEMP - decide to keep as a
+      debug switch or delete. _Effort:_ S.
+
+### Bigger bets / unknown-unknowns (speculative)
+
+- [ ] **Decision + outcome eval harness.** Log each decision with the resulting
+      outcome (hit/miss/escape/kill) and replay offline to score a config or a
+      question-wording change on kill-rate/escape-rate. _Why:_ turns tuning from
+      "watch it play" into data. Per TypeSafe's docs these labeled signals can even
+      become classical-ML features. _Effort:_ L. _Trade-off:_ real infra; highest
+      long-term payoff for accuracy work.
+- [ ] **Confidence-routing.** Act only when `confidence` clears a threshold;
+      otherwise fall back to the code policy (or hold). _Why:_ uses TypeSafe's
+      second axis (the answer says *what*, confidence says *whether to trust it*).
+      _Effort:_ M. _Trade-off:_ needs the code fallback to exist first.
+- [ ] **Self-play difficulty finder.** Let the AI's live kill/escape rate scale the
+      spawn rate up until it starts losing - auto-discovers its breaking point and
+      makes a fun "watch it sweat" mode. _Effort:_ M. Speculative but cheap to try.
+- [ ] **Model vs pure-code baseline.** Run the code-only pilot and the Jev pilot
+      under identical spawns and compare kill/escape rates - quantifies exactly
+      what the model adds. _Effort:_ M (needs the fallback + harness).
+- [ ] **Leaderboard for AI runs** (score + escapes + kill rate), separate from
+      human high scores. _Effort:_ M. Depends on a backend/store.
+
+---
+
 Controls, tech stack, and project structure live in [README.md](README.md); architecture notes for AI-assisted development live in [CLAUDE.md](CLAUDE.md).
