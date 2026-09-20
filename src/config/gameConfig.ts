@@ -195,10 +195,15 @@ export const GAME_CONFIG = {
     gridCols: 11,                    // Enemy-tracking grid width (columns)
     gridRows: 5,                     // Enemy-tracking grid height (rows)
     requestTimeoutMs: 1000,          // Abort a decision tick that exceeds this
-    minTickIntervalMs: 500,          // Min wall-clock between requests (~2/sec). The vernier does fine aim
-                                     // every frame in code, so the model can decide target/mode less often.
-    maxRequestsPerEngage: 1000,      // Runaway backstop only (~5 min at current cadence). Normal stops are
-                                     // death / toggle-off / tab-hidden — NOT this cap. Lower it to add a governor.
+    // Cadence is EVENT-DRIVEN (see AiPilotController): the model is only asked when
+    // something meaningful changes (front target killed/replaced, an invader starts
+    // diving) or on an adaptive safety refresh — not on a fixed timer. Steady-state
+    // aiming is all code (target lock + vernier), so most ticks make zero requests.
+    minTickIntervalMs: 500,          // Rate CEILING — never decide faster than this (~2/sec max)
+    pollIntervalMs: 120,             // How often to check for a decision-worthy event (cheap, no network)
+    activeRefreshMs: 450,            // Re-decide at least this often WHILE an invader is diving (keeps evade timely)
+    idleRefreshMs: 2000,             // Re-decide at most this rarely when the board is calm (safety net)
+    maxRequestsPerEngage: 1000,      // Runaway backstop only. Normal stops are death / toggle-off / tab-hidden.
     maxConsecutiveFailures: 5,       // Auto-disable the pilot after this many failed ticks
     failureBackoffMs: 300,           // Extra wait after a failed tick before retrying
     trace: true,                     // TEMP: log enemy spawn/kill/escape events to the console for study

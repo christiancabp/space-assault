@@ -136,7 +136,7 @@ Real-time autopilot that plays the game via TypeSafe's Jev model. Full writeup i
 
 - [x] Hidden behind the `/ai-pilot` route (`src/ai/featureFlag.ts` + `vercel.json` SPA rewrite)
 - [x] 2D "matrix" grid state (`src/ai/grid.ts`, 11×5, imminence 1-9) + live "AI VIEW" mini-map
-- [x] Self-clocked decision loop, single request in flight (`src/ai/AiPilotController.tsx`)
+- [x] Event-driven decision loop - decide on target-change/dive + adaptive refresh, ~2/sec ceiling (`src/ai/AiPilotController.tsx`)
 - [x] Three parallel Choice questions - `mode` / `aim_horizontal` / `aim_vertical` (`api/pilot.ts`)
 - [x] Self-contained serverless proxy via native `fetch` (no SDK); Vite dev middleware reuses `decidePilot`
 - [x] Always-be-shooting (fire in code, not a model question)
@@ -144,7 +144,7 @@ Real-time autopilot that plays the game via TypeSafe's Jev model. Full writeup i
 - [x] Evade = invincible barrel-roll dodge (i-frames through the collision)
 - [x] Live HUD: stats panel (desktop / 📊 on mobile), scrolling decision log, ENEMY escape KPI
 - [x] Game Over session stats; per-game reset
-- [x] Budget guards: off by default, ~2/sec throttle, runaway cap, auto-disable on repeated failures
+- [x] Budget guards: off by default, **event-driven** cadence (~0.8/sec typical, ~2/sec ceiling), runaway cap, auto-disable on repeated failures
 
 ## AI Pilot - Future Improvements
 
@@ -154,19 +154,18 @@ built. Effort = S/M/L. "Speculative" = unproven, worth a spike first.
 **Quick wins (do these first):**
 
 - [ ] Trim the request payload (S)
-- [ ] Skip the model in steady-state / event-driven cadence (M) - biggest cost lever
+- [x] Event-driven cadence - decide on change, not a timer (~60% fewer calls). _Next:_ skip the model entirely in steady-state; trim tokens
 - [ ] Break lock on an imminent escape (S-M) - biggest remaining accuracy gap
 - [ ] Pure-code fallback pilot when the API is down/slow (M) - reliability
 
 ### API cost (fewer / cheaper requests)
 
-- [ ] **Event-driven / adaptive cadence.** Only call the model when the board
-      *meaningfully* changes (new spawn, locked target destroyed, lock broken,
-      mode should flip), instead of the fixed `minTickIntervalMs` (~2/sec) timer;
-      otherwise hold the last decision. _Why:_ steady-state aiming is already all
-      code (vernier/lock) - the model rarely needs to re-decide. Could cut
-      requests by a large factor. _Effort:_ M. _Trade-off:_ must define "changed"
-      well or it gets sluggish reacting to fast dives.
+- [x] ✅ **Event-driven / adaptive cadence (SHIPPED).** The model is asked only on
+      meaningful change (front target killed/replaced, an invader diving) plus an
+      adaptive safety refresh (`activeRefreshMs` while diving / `idleRefreshMs`
+      when calm), under a `minTickIntervalMs` ~2/sec ceiling. Cut typical usage
+      from ~2/sec to **~0.8/sec (~60%)** with no accuracy loss. Follow-ups below
+      (skip-in-steady-state, token trim) can go further.
 - [ ] **Skip the model when code is confident.** The lock + vernier fully handle
       "keep hunting the locked target." Only consult Jev to (a) choose a *new*
       target after a kill, or (b) decide attack↔evade. Between those, don't call.

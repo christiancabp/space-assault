@@ -60,7 +60,7 @@ Press **P** in-game (or the on-screen **AI PILOT** button) to hand control to an
 A small real-time control loop around Jev:
 
 1. **The board is a matrix.** Enemies keep their spawn x/y and only fly toward you (in z), so from behind the ship it's a 2D grid where only the ship moves. The game bins the playfield into an 11×5 grid; each enemy's distance becomes an *imminence* score (1 = far, 9 = about to reach you). That grid is exactly what the model sees — and what the "AI VIEW" mini-map draws.
-2. **The model decides strategy (~2×/sec).** One request asks Jev three typed questions over the grid: **attack or evade**, and **which way** to move (horizontal + vertical) toward the most urgent invader.
+2. **The model decides strategy — only when the board changes (~1×/sec).** One request asks Jev three typed questions over the grid: **attack or evade**, and **which way** to move toward the most urgent invader. It's event-driven (a kill, a new dive, …), not polled on a timer, so it makes far fewer calls.
 3. **Code lands the shot (every frame).** The model's left/right/up/down is coarse, so a per-frame *vernier* steers precisely onto the target invader's exact position once the ship is close — this is what makes it hit reliably instead of spraying near-misses.
 4. **Always be shooting.** While engaged the ship holds the trigger down, just like a human leaving the fire button pressed.
 
@@ -85,7 +85,7 @@ In production the endpoint is a Vercel serverless function (`api/pilot.ts`). Set
 
 ### Request budget
 
-Deliberately conservative: off until you engage, one request in flight at a time, a minimum gap between requests (`minTickIntervalMs`, ~2/sec since the per-frame vernier handles fine aim), a runaway backstop (`maxRequestsPerEngage`), and auto-disable after repeated failures. It also stops on death, toggle-off, or the tab going hidden. All knobs live in `GAME_CONFIG.AI_PILOT`.
+Deliberately conservative: off until you engage, one request in flight, and **event-driven** — it only asks the model when the board changes (front target killed/replaced, an invader diving), so it typically runs at **~0.8 requests/sec** (capped at ~2/sec by `minTickIntervalMs`). Plus a runaway backstop and auto-disable on repeated failures; it stops on death, toggle-off, or the tab going hidden. All knobs live in `GAME_CONFIG.AI_PILOT`.
 
 ## Tech Stack
 

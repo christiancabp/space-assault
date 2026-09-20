@@ -33,7 +33,7 @@ Our bet going in: **yes — if the model makes the *decisions* and code handles 
 **Yes.** On the hidden `/ai-pilot` route you press **P** and the ship flies
 itself: hunting invaders, lining up shots, barrel-rolling out of danger. It lands
 **~90%+ of its shots**, in practice lets **essentially zero invaders escape**,
-runs at **~2 requests/second**, and is deployed in production.
+runs at **under ~1 request/second** (event-driven), and is deployed in production.
 
 But the *first* version missed about half its shots and wandered back to the
 middle of the screen after every burst. The interesting part is the handful of
@@ -45,22 +45,29 @@ whole thing.
 
 ## How it works
 
-### The big idea: decide at a cadence, execute every frame
+### The big idea: decide on change, execute every frame
 
 A ~100 ms remote model can't drive a 60 fps game directly. It doesn't need to.
 The pattern is:
 
-> **Decide at a cadence, execute every frame.**
+> **Decide only when something changes, execute every frame.**
 
-A few times a second we send the model a small, structured question about the
-board; it returns a typed decision; the ship executes that decision on *every*
-animation frame until the next one arrives.
+Steady-state aiming is all code (target lock + vernier, below), so we don't poll
+the model on a timer. We ask it only when the board *meaningfully* changes — the
+front target was killed/replaced, or an invader starts diving — plus a slow
+safety refresh. The ship executes the last decision on *every* frame in between,
+so it stays smooth while most ticks make **zero** requests.
 
 ```text
-  model decision:  ●─────────500 ms─────────●─────────500 ms─────────●   (~2 / sec)
-  frames @ 60fps:  ┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊   (~30 frames each)
-                   └── the ship executes the LAST decision on every frame ──┘
+  events:        spawn    kill          dive!         kill              (irregular)
+  decisions:       ●───────●─────────────●─────────────●                (only on change)
+  frames @ 60fps:  ┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊┊   (execute last decision)
+                   └──── a rate ceiling still caps bursts at ~2/sec ────┘
 ```
+
+In practice this runs around **~0.8 requests/second** while playing (vs a fixed
+~2/sec) with no loss of accuracy — the code vernier does the fine aiming
+continuously regardless of when the model last spoke.
 
 The other load-bearing idea is the **division of labour**:
 
@@ -272,9 +279,10 @@ if (enemies.length === 0) {                 // nothing to chase → HOLD (do not
   and an "ENEMY" escape KPI, all on the HUD; a full recap on Game Over.
 - **Server key handling** — `api/pilot.ts` is a self-contained serverless proxy
   (native `fetch`, no SDK) so `TYPESAFE_API_KEY` never touches the browser.
-- **Budget & safety** — off by default, one request in flight (self-clocked), a
-  throttle, a runaway cap, auto-disable on repeated failures, and it stops on
-  death / toggle / tab-hidden.
+- **Budget & safety** — off by default; **event-driven** (decide on change, not a
+  fixed timer) under a ~2/sec rate ceiling, so typically ~0.8 req/sec; one request
+  in flight; runaway cap; auto-disable on repeated failures; stops on death /
+  toggle / tab-hidden.
 
 ---
 
@@ -385,10 +393,11 @@ around.**
 The pilot is good, but there's clear headroom. The full backlog (with
 effort/trade-off notes) lives in [`TODO.md`](../TODO.md); the high-leverage ones:
 
-- **Cost — stop calling the model when code already knows what to do.** Steady
-  aiming is 100% code now, so switch from a fixed ~2/sec timer to **event-driven
-  decisions** (only on a spawn, a kill, a broken lock, or a mode flip). This is a
-  far bigger win than trimming tokens — most ticks could make *zero* requests.
+- ✅ **Cost — event-driven cadence (shipped).** The model is now asked only on
+  meaningful change (front target killed/replaced, an invader diving) plus an
+  adaptive safety refresh, under a ~2/sec ceiling — which dropped typical usage
+  from ~2/sec to **~0.8/sec (~60% fewer calls)** with no accuracy loss. Next lever:
+  trim the per-request tokens, or drop the aim questions entirely (code aims now).
 - **Accuracy — break the lock on an imminent escape.** Target-lock's one weakness
   is over-committing while another invader slips by; switching when a *different*
   invader hits imminence 9 would close the last gaps.
@@ -417,7 +426,10 @@ and the ENEMY counter (how many it lets slip — spoiler: none).
 | --- | --- | --- |
 | `toggleKey` | `KeyP` | Keyboard toggle |
 | `gridCols` / `gridRows` | `11` / `5` | Grid resolution the model sees |
-| `minTickIntervalMs` | `500` | Min gap between requests (~2/sec) |
+| `minTickIntervalMs` | `500` | Rate ceiling — never decide faster than this (~2/sec) |
+| `pollIntervalMs` | `120` | How often to check for a decision-worthy event (cheap, no network) |
+| `activeRefreshMs` | `450` | Re-decide interval while an invader is diving |
+| `idleRefreshMs` | `2000` | Re-decide interval when the board is calm |
 | `aiSpeedScale` | `0.5` | Ship speed under AI (finer aim) |
 | `vernierRange` | `4` | Distance at which code takes over exact aim |
 | `vernierGain` | `2` | Proportional gain (smaller = snappier) |

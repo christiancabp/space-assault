@@ -5,10 +5,13 @@
  * effects). Two responsibilities:
  *   1. Hotkeys: toggle the pilot with AI_PILOT.toggleKey; any movement key while
  *      engaged hands control straight back to the human.
- *   2. A self-clocked, single-flight decision loop: while engaged and playing,
- *      snapshot the game, ask /api/pilot, map the decision into aiInput, then
- *      immediately issue the next request. The ship executes the last decision
- *      every frame in between (see Player.tsx).
+ *   2. An EVENT-DRIVEN, single-flight decision loop: while engaged and playing it
+ *      polls cheaply (no network) and only asks /api/pilot when something
+ *      meaningful changes — the front target was killed/replaced, or an invader
+ *      started diving — plus an adaptive safety refresh (short while diving, long
+ *      when calm). Steady-state aiming is all code (target lock + vernier in
+ *      Player.tsx), so most ticks make ZERO requests. A rate ceiling caps it at
+ *      ~2/sec. The ship executes the last decision every frame in between.
  *
  * The loop stops on toggle-off, pause, game-over, unmount, and tab-hidden, and
  * auto-disables after too many consecutive failures.
@@ -22,6 +25,7 @@ import { decisionToInput } from './pilotMapping';
 import { requestDecision } from './pilotClient';
 import { useAiPilotStore } from '../stores/aiPilotStore';
 import { useGameStore } from '../stores/gameStore';
+import { useEnemyStore } from '../stores/enemyStore';
 import { isMovementKey } from '../hooks/useKeyboard';
 
 function delay(ms: number): Promise<void> {
@@ -83,15 +87,52 @@ export function AiPilotController() {
 
     const run = async () => {
       let requests = 0;
+      let lastMostUrgentId: string | null = null;
+      let lastDecisionAt = 0; // 0 = no decision made yet this engagement
 
       while (!stopped) {
         // No point deciding while the tab is hidden.
         if (typeof document !== 'undefined' && document.hidden) {
-          await delay(200);
+          await delay(cfg.pollIntervalMs);
           continue;
         }
 
-        const tickStart = Date.now();
+        // Cheap, local board read (NO network) to decide whether to call the model.
+        const enemies = useEnemyStore.getState().enemies;
+        let mostUrgentId: string | null = null;
+        let nearThreat = false;
+        if (enemies.length > 0) {
+          let top = enemies[0];
+          for (const e of enemies) {
+            if (e.position.z > top.position.z) top = e;
+            if (e.phase === 'attacking') nearThreat = true; // an invader is diving
+          }
+          mostUrgentId = top.id;
+        }
+
+        const now = Date.now();
+        const sinceLast = now - lastDecisionAt;
+
+        // Rate ceiling: never decide faster than minTickIntervalMs.
+        if (lastDecisionAt !== 0 && sinceLast < cfg.minTickIntervalMs) {
+          await delay(cfg.pollIntervalMs);
+          continue;
+        }
+
+        // Event-driven: decide on a meaningful change, else on an adaptive refresh
+        // (short while an invader is diving so evade stays timely; long when calm).
+        const refreshMs = nearThreat ? cfg.activeRefreshMs : cfg.idleRefreshMs;
+        const shouldDecide =
+          lastDecisionAt === 0 || // first decision of the engagement
+          mostUrgentId !== lastMostUrgentId || // front target killed / replaced / a diver overtook it
+          sinceLast >= refreshMs; // periodic re-check (mode may need to flip)
+
+        if (!shouldDecide) {
+          await delay(cfg.pollIntervalMs);
+          continue;
+        }
+
+        // --- one decision (this is the only place we hit the network) ---
         let failedThisTick = false;
         const state = buildPilotState();
         tickController = new AbortController();
@@ -101,6 +142,8 @@ export function AiPilotController() {
         );
         requests += 1;
         store.recordRequest();
+        lastDecisionAt = now;
+        lastMostUrgentId = mostUrgentId;
 
         try {
           store.setStatus('thinking');
@@ -135,14 +178,10 @@ export function AiPilotController() {
           break;
         }
 
-        // Throttle: keep a minimum gap between request starts. On success this is
-        // just minTickIntervalMs; a failed tick additionally waits failureBackoffMs.
-        const elapsed = Date.now() - tickStart;
-        const wait = Math.max(
-          failedThisTick ? cfg.failureBackoffMs : 0,
-          cfg.minTickIntervalMs - elapsed
-        );
-        if (wait > 0) await delay(wait);
+        // Brief backoff after a failed tick before the next poll.
+        if (failedThisTick && cfg.failureBackoffMs > 0) {
+          await delay(cfg.failureBackoffMs);
+        }
       }
     };
 
