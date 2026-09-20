@@ -97,6 +97,12 @@ export function AiPilotController() {
           continue;
         }
 
+        // Engagement time limit — auto-disengage after maxEngageMs at a time.
+        if (Date.now() - segStart >= cfg.maxEngageMs) {
+          store.setEnabled(false); // re-engage (P / button) to keep playing
+          break;
+        }
+
         // Cheap, local board read (NO network) to decide whether to call the model.
         const enemies = useEnemyStore.getState().enemies;
         let mostUrgentId: string | null = null;

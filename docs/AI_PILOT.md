@@ -281,8 +281,8 @@ if (enemies.length === 0) {                 // nothing to chase → HOLD (do not
   (native `fetch`, no SDK) so `TYPESAFE_API_KEY` never touches the browser.
 - **Budget & safety** — off by default; **event-driven** (decide on change, not a
   fixed timer) under a ~2/sec rate ceiling, so typically ~0.8 req/sec; one request
-  in flight; runaway cap; auto-disable on repeated failures; stops on death /
-  toggle / tab-hidden.
+  in flight; auto-disable on repeated failures; stops on death / toggle /
+  tab-hidden / after ~60s engaged (`maxEngageMs`); runaway request cap behind that.
 
 ---
 
@@ -437,7 +437,8 @@ and the ENEMY counter (how many it lets slip — spoiler: none).
 | `moveConfidence` | `0.55` | Below this on an aim Choice → hold (center) |
 | `evadeConfidence` | `0.6` | Below this on `mode=evade` → keep attacking |
 | `requestTimeoutMs` | `1000` | Abort a slow tick |
-| `maxRequestsPerEngage` | `1000` | Runaway backstop (~5 min) |
+| `maxEngageMs` | `60000` | Auto-disengage after ~60s engaged (re-press P to continue) |
+| `maxRequestsPerEngage` | `1000` | Far runaway backstop (the time cap usually fires first) |
 | `maxConsecutiveFailures` | `5` | Auto-disable after repeated failures |
 | `trace` | `true` | Log spawn/kill/escape to the console (dev only) |
 

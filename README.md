@@ -85,7 +85,7 @@ In production the endpoint is a Vercel serverless function (`api/pilot.ts`). Set
 
 ### Request budget
 
-Deliberately conservative: off until you engage, one request in flight, and **event-driven** — it only asks the model when the board changes (front target killed/replaced, an invader diving), so it typically runs at **~0.8 requests/sec** (capped at ~2/sec by `minTickIntervalMs`). Plus a runaway backstop and auto-disable on repeated failures; it stops on death, toggle-off, or the tab going hidden. All knobs live in `GAME_CONFIG.AI_PILOT`.
+Deliberately conservative: off until you engage, one request in flight, and **event-driven** — it only asks the model when the board changes (front target killed/replaced, an invader diving), so it typically runs at **~0.8 requests/sec** (capped at ~2/sec by `minTickIntervalMs`). Plus a ~60s per-engagement cap (re-press P to keep going), a runaway backstop, and auto-disable on repeated failures; it also stops on death, toggle-off, or the tab going hidden. All knobs live in `GAME_CONFIG.AI_PILOT`.
 
 ## Tech Stack
 

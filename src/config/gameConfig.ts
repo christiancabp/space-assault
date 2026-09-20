@@ -203,7 +203,8 @@ export const GAME_CONFIG = {
     pollIntervalMs: 120,             // How often to check for a decision-worthy event (cheap, no network)
     activeRefreshMs: 450,            // Re-decide at least this often WHILE an invader is diving (keeps evade timely)
     idleRefreshMs: 2000,             // Re-decide at most this rarely when the board is calm (safety net)
-    maxRequestsPerEngage: 1000,      // Runaway backstop only. Normal stops are death / toggle-off / tab-hidden.
+    maxEngageMs: 60000,              // Auto-disengage after this long engaged at a time (~60s). Re-press P to continue.
+    maxRequestsPerEngage: 1000,      // Far runaway backstop (the time cap above normally fires first).
     maxConsecutiveFailures: 5,       // Auto-disable the pilot after this many failed ticks
     failureBackoffMs: 300,           // Extra wait after a failed tick before retrying
     trace: true,                     // TEMP: log enemy spawn/kill/escape events to the console for study
